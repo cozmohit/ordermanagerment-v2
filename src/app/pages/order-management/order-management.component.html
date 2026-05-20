@@ -1,0 +1,426 @@
+<div class="container-fluid position-relative">
+
+  <div class="ib-page-header">
+    <h2 class="ib-page-header__title">Order Management</h2>
+  </div>
+
+  <!-- Filters -->
+  <div class="ib-filter-card ib-filter-card--compact mb-4">
+    <div class="row g-2 align-items-end">
+      <div class="col-lg-6">
+        <label class="form-label ib-compact-filter__label fw-bold small text-muted">Quick Search</label>
+        <input type="text" class="form-control form-control-sm bg-light ib-compact-filter__control"
+          [(ngModel)]="pendingFilters.search" name="orderSearch"
+          placeholder="Search account, name, ABD, territory…" />
+      </div>
+      <div class="col-lg-2">
+        <label class="form-label ib-compact-filter__label fw-bold small text-muted">Status</label>
+        <select class="form-select form-select-sm bg-light ib-compact-filter__control"
+          [(ngModel)]="pendingFilters.status" name="statusFilter">
+          <option *ngFor="let opt of statusOptions" [ngValue]="opt">{{ opt }}</option>
+        </select>
+      </div>
+      <div class="col-lg-2">
+        <label class="form-label ib-compact-filter__label fw-bold small text-muted">Distribution</label>
+        <select class="form-select form-select-sm bg-light ib-compact-filter__control"
+          [(ngModel)]="pendingFilters.distribution" name="distFilter">
+          <option *ngFor="let opt of distributionOptions" [ngValue]="opt">{{ opt }}</option>
+        </select>
+      </div>
+      <div class="col-lg-2 d-flex align-items-end">
+        <button class="btn btn-primary btn-sm ib-compact-filter__button w-100" (click)="applyFilters()">
+          Apply
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="ib-section-card">
+    <div class="ib-section-card__header">
+      <h5 class="ib-section-card__title">Order Directory</h5>
+      <span class="ib-table-toolbar__meta">{{ filteredOrders.length }} matching orders</span>
+    </div>
+    <div class="card-body p-0">
+      <table class="table table-hover table-sm align-middle ib-data-table w-100">
+        <thead class="ib-table-header">
+          <tr>
+            <th class="py-2 px-3 om-th-nowrap">Ship To Name</th>
+            <th class="py-2 om-th-nowrap">Business Manager</th>
+            <th class="py-2 om-th-nowrap">Territory</th>
+            <th class="py-2 text-center om-th-nowrap">Delivery Qty</th>
+            <th class="py-2 text-center om-th-nowrap">Units Assigned</th>
+            <th class="py-2 om-th-nowrap">Channel</th>
+            <th class="py-2 om-th-nowrap">Status</th>
+            <th class="py-2 text-end px-3 om-th-nowrap">Actions</th>
+          </tr>
+        </thead>
+        <tbody>
+          <tr *ngFor="let order of filteredOrders">
+            <td class="px-3 om-ship-name-cell">{{ order.shipToName }}</td>
+            <td>
+              <span [class.text-muted]="order.businessManager === 'OPEN'" [class.fst-italic]="order.businessManager === 'OPEN'">
+                {{ order.businessManager }}
+              </span>
+            </td>
+            <td>{{ order.territory }}</td>
+            <td class="text-center">{{ order.deliveryQty }}</td>
+            <td class="text-center">{{ order.unitsAssigned }}</td>
+            <td class="small">{{ order.distribution }}</td>
+            <td>
+              <span class="ib-status-badge" [ngClass]="{
+                'ib-status-badge--success': order.status === 'Shipped',
+                'ib-status-badge--warning': order.status === 'Pending',
+                'ib-status-badge--danger':  order.status === 'Credit Hold' || order.status === 'Cancelled'
+              }">{{ order.status }}</span>
+            </td>
+            <td class="px-3 text-end" style="white-space: nowrap;">
+              <span class="om-tooltip-wrap" data-tip="Track Shipment">
+                <button class="ib-icon-btn me-1" (click)="openTrackModal(order)">
+                  <i class="bi bi-truck"></i>
+                </button>
+              </span>
+              <span class="om-tooltip-wrap" data-tip="Edit Order">
+                <button class="ib-icon-btn me-1" (click)="openEditModal(order)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+              </span>
+              <span class="om-tooltip-wrap" data-tip="Split Order">
+                <button class="ib-icon-btn me-1" (click)="openSplitModal(order)">
+                  <svg xmlns="http://www.w3.org/2000/svg" width="13" height="13" viewBox="0 0 16 16">
+                    <path d="M1 8 H7 M7 8 L13 3.5 M7 8 L13 12.5"
+                          fill="none" stroke="currentColor" stroke-width="1.9"
+                          stroke-linecap="round" stroke-linejoin="round"/>
+                    <polygon points="15,2.5 11.2,5.8 13.5,7.8" fill="currentColor"/>
+                    <polygon points="15,13.5 13.5,8.2 11.2,10.2" fill="currentColor"/>
+                  </svg>
+                </button>
+              </span>
+              <!-- <span class="om-tooltip-wrap" data-tip="Ship To Details">
+                <button class="ib-icon-btn" (click)="openDetailsModal(order)">
+                  <i class="bi bi-card-list"></i>
+                </button>
+              </span> -->
+            </td>
+          </tr>
+          <tr *ngIf="filteredOrders.length === 0">
+            <td colspan="8" class="text-center text-muted py-4">No orders match the current filters.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+</div>
+
+
+<!-- ══ MODAL 1 — Track Shipment ══════════════════════════════ -->
+<div *ngIf="trackingOrder" class="ib-modal-overlay" (click)="closeTrackModal()">
+  <div class="ib-modal-shell om-modal" style="max-width: 560px;" (click)="$event.stopPropagation()">
+    <div class="ib-modal-header">
+      <div class="d-flex flex-column gap-1">
+        <h5 class="ib-modal-title mb-0">Track Shipment</h5>
+        <span class="text-muted small">{{ trackingOrder.accountNo || trackingOrder.id }} &mdash; {{ trackingOrder.shipToName }}</span>
+      </div>
+      <div class="d-flex align-items-center gap-2">
+        <span class="ib-status-badge" [ngClass]="{
+          'ib-status-badge--success': trackingOrder.status === 'Shipped',
+          'ib-status-badge--warning': trackingOrder.status === 'Pending',
+          'ib-status-badge--danger':  trackingOrder.status === 'Credit Hold' || trackingOrder.status === 'Cancelled'
+        }">{{ trackingOrder.status || 'In Progress' }}</span>
+        <button type="button" class="btn-close" (click)="closeTrackModal()"></button>
+      </div>
+    </div>
+    <div class="ib-modal-body">
+      <div class="om-v-timeline">
+        <div *ngFor="let step of getTimelineSteps(trackingOrder); let last = last"
+          class="om-v-timeline__item"
+          [class.om-v-timeline__item--completed]="step.state === 'completed'"
+          [class.om-v-timeline__item--current]="step.state === 'current'"
+          [class.om-v-timeline__item--issue]="step.state === 'issue'"
+          [class.om-v-timeline__item--upcoming]="step.state === 'upcoming'"
+          [class.om-v-timeline__item--last]="last">
+          <div class="om-v-timeline__marker">
+            <i class="bi"
+              [class.bi-check-lg]="step.state === 'completed'"
+              [class.bi-arrow-right]="step.state === 'current'"
+              [class.bi-exclamation-lg]="step.state === 'issue'"
+              [class.bi-circle]="step.state === 'upcoming'"></i>
+          </div>
+          <div class="om-v-timeline__body">
+            <div class="d-flex justify-content-between align-items-start gap-3 mb-1">
+              <span class="om-v-timeline__label">{{ step.label }}</span>
+              <span class="om-v-timeline__date">{{ step.date }}</span>
+            </div>
+            <p class="om-v-timeline__detail mb-0">{{ step.detail }}</p>
+          </div>
+        </div>
+      </div>
+    </div>
+    <div class="ib-modal-footer">
+      <button type="button" class="btn ib-btn-secondary" (click)="closeTrackModal()">Close</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MODAL 2 — Edit Order ══════════════════════════════════ -->
+<div *ngIf="editingOrder" class="ib-modal-overlay" (click)="closeEditModal()">
+  <div class="ib-modal-shell om-modal" style="max-width: 800px; max-height: 93vh; display: flex; flex-direction: column;" (click)="$event.stopPropagation()">
+    <div class="ib-modal-header">
+      <div class="d-flex flex-column gap-1">
+        <h5 class="ib-modal-title mb-0">Edit Order</h5>
+        <span class="text-muted small">{{ editingOrder.accountNo || editingOrder.id }}</span>
+      </div>
+      <button type="button" class="btn-close" (click)="closeEditModal()"></button>
+    </div>
+    <div class="ib-modal-body" style="overflow-y: auto; flex: 1;">
+      <form #editFormRef="ngForm">
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Account No.</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.accountNo" name="editAccountNo">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Distribution</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.distribution" name="editDist">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Status</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.status" name="editStatus" placeholder="e.g. Shipped">
+          </div>
+
+          <div class="col-md-8">
+            <label class="form-label fw-bold small text-muted">Ship To Name</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.shipToName" name="editShipToName">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Ship To Address</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.shipToAddress" name="editShipToAddr">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">City</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.shipToCity" name="editCity">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label fw-bold small text-muted">State</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.shipToState" name="editState">
+          </div>
+          <div class="col-md-2">
+            <label class="form-label fw-bold small text-muted">ZIP</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.shipToZip" name="editZip">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Area</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.area" name="editArea">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">ABD</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.abd" name="editAbd">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Business Manager</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.businessManager" name="editMgr">
+          </div>
+          <div class="col-md-6">
+            <label class="form-label fw-bold small text-muted">Territory</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.territory" name="editTerr">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-bold small text-muted">Delivery Qty</label>
+            <input type="number" min="0" class="form-control bg-light" [(ngModel)]="editForm.deliveryQty" name="editDeliveryQty">
+          </div>
+          <div class="col-md-3">
+            <label class="form-label fw-bold small text-muted">Units Assigned</label>
+            <input type="number" min="0" class="form-control bg-light" [(ngModel)]="editForm.unitsAssigned" name="editUnits">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Order Date</label>
+            <input type="date" class="form-control bg-light" [(ngModel)]="editForm.orderDate" name="editOrderDate">
+          </div>
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Delivery Date</label>
+            <input type="date" class="form-control bg-light" [(ngModel)]="editForm.deliveryDate" name="editDeliveryDate">
+          </div>
+
+        </div>
+      </form>
+    </div>
+    <div class="ib-modal-footer">
+      <button type="button" class="btn ib-btn-secondary" (click)="closeEditModal()">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="saveEdit()">Save Changes</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MODAL 3 — Split Order ═════════════════════════════════ -->
+<div *ngIf="splittingOrder" class="ib-modal-overlay" (click)="closeSplitModal()">
+  <div class="ib-modal-shell om-modal" style="max-width: 820px;" (click)="$event.stopPropagation()">
+    <div class="ib-modal-header">
+      <div class="d-flex flex-column gap-1">
+        <h5 class="ib-modal-title mb-0">Split Order</h5>
+        <span class="text-muted small">{{ splittingOrder.accountNo || splittingOrder.id }} &mdash; {{ splittingOrder.shipToName }}</span>
+      </div>
+      <button type="button" class="btn-close" (click)="closeSplitModal()"></button>
+    </div>
+    <div class="ib-modal-body">
+      <div class="om-split-bar mb-4">
+        <div class="d-flex justify-content-between align-items-center mb-2">
+          <span class="fw-bold small text-muted text-uppercase" style="font-size:0.68rem; letter-spacing:0.04em;">Units Assigned</span>
+          <span class="fw-bold" [class.text-danger]="splitIsOver" [class.text-success]="!splitIsOver && splitTotal > 0">
+            {{ splitTotal }} / {{ splittingOrder.unitsAssigned }}
+          </span>
+        </div>
+        <div class="progress" style="height: 7px; border-radius: 99px;">
+          <div class="progress-bar"
+            [class.bg-danger]="splitIsOver"
+            [class.bg-success]="!splitIsOver && splitTotal === splittingOrder.unitsAssigned && splitTotal > 0"
+            [style.width.%]="splitProgressPercent"
+            style="transition: width 0.2s ease; border-radius: 99px;"></div>
+        </div>
+        <p *ngIf="splitIsOver" class="text-danger small mt-1 mb-0">
+          <i class="bi bi-exclamation-triangle me-1"></i>
+          Total ({{ splitTotal }}) exceeds available units ({{ splittingOrder.unitsAssigned }}).
+        </p>
+      </div>
+      <div class="om-split-rows">
+        <div class="om-split-row om-split-row--header">
+          <span>ABD</span><span>Business Manager</span><span>Territory</span>
+          <span class="text-center">Units</span><span></span>
+        </div>
+        <div class="om-split-row" *ngFor="let row of splitAssignments; let i = index">
+          <div>
+            <select class="form-select form-select-sm bg-light" [(ngModel)]="row.abd" [name]="'splitAbd_'+i">
+              <option value="">— ABD —</option>
+              <option *ngFor="let opt of abdOptions" [value]="opt">{{ opt }}</option>
+            </select>
+          </div>
+          <div>
+            <select class="form-select form-select-sm bg-light" [(ngModel)]="row.businessManager" [name]="'splitMgr_'+i">
+              <option value="">— Manager —</option>
+              <option *ngFor="let opt of managerOptions" [value]="opt">{{ opt }}</option>
+            </select>
+          </div>
+          <div>
+            <select class="form-select form-select-sm bg-light" [(ngModel)]="row.territory" [name]="'splitTerr_'+i">
+              <option value="">— Territory —</option>
+              <option *ngFor="let opt of territoryOptions" [value]="opt">{{ opt }}</option>
+            </select>
+          </div>
+          <div>
+            <input type="number" min="0" [max]="splittingOrder.unitsAssigned"
+              class="form-control form-control-sm bg-light text-center"
+              [(ngModel)]="row.units" [name]="'splitUnits_'+i">
+          </div>
+          <div class="d-flex justify-content-center">
+            <button type="button" class="ib-icon-btn ib-icon-btn--danger"
+              (click)="removeSplitRow(i)" [disabled]="splitAssignments.length === 1" title="Remove">
+              <i class="bi bi-x-lg"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+      <button type="button" class="btn ib-btn-secondary btn-sm mt-3" (click)="addSplitRow()">
+        <i class="bi bi-plus-lg me-1"></i>Add Assignment
+      </button>
+    </div>
+    <div class="ib-modal-footer">
+      <button type="button" class="btn ib-btn-secondary" (click)="closeSplitModal()">Cancel</button>
+      <button type="button" class="btn btn-primary" [disabled]="!splitIsValid" (click)="saveSplit()">Save Split</button>
+    </div>
+  </div>
+</div>
+
+
+<!-- ══ MODAL 4 — Order Details ══════════════════════════════ -->
+<div *ngIf="detailsOrder" class="ib-modal-overlay" (click)="closeDetailsModal()">
+  <div class="ib-modal-shell om-modal" style="max-width: 800px; max-height: 90vh; display: flex; flex-direction: column;" (click)="$event.stopPropagation()">
+    <div class="ib-modal-header">
+      <div class="d-flex flex-column gap-1">
+        <h5 class="ib-modal-title mb-0">Order Details</h5>
+        <span class="text-muted small">{{ detailsOrder.accountNo || detailsOrder.id }}</span>
+      </div>
+      <button type="button" class="btn-close" (click)="closeDetailsModal()"></button>
+    </div>
+    <div class="ib-modal-body" style="overflow-y: auto; flex: 1;">
+      <div class="om-details-grid">
+        <div class="om-details-row" *ngIf="detailsOrder.accountNo">
+          <span class="om-details-label">Account No.</span>
+          <span class="om-details-value fw-bold text-primary">{{ detailsOrder.accountNo }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">Ship To Name</span>
+          <span class="om-details-value fw-bold">{{ detailsOrder.shipToName || '—' }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">Address</span>
+          <span class="om-details-value">{{ detailsOrder.shipToAddress || '—' }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">City</span>
+          <span class="om-details-value">{{ detailsOrder.shipToCity || '—' }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">State</span>
+          <span class="om-details-value fw-bold">{{ detailsOrder.shipToState || '—' }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">ZIP</span>
+          <span class="om-details-value">{{ detailsOrder.shipToZip || '—' }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">Channel</span>
+          <span class="om-details-value">{{ detailsOrder.distribution }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">Area</span>
+          <span class="om-details-value">{{ detailsOrder.area }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">ABD</span>
+          <span class="om-details-value">{{ detailsOrder.abd }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">Business Mgr</span>
+          <span class="om-details-value">{{ detailsOrder.businessManager }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">Territory</span>
+          <span class="om-details-value">{{ detailsOrder.territory }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">Units Assigned</span>
+          <span class="om-details-value fw-bold">{{ detailsOrder.unitsAssigned }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">Delivery Qty</span>
+          <span class="om-details-value fw-bold">{{ detailsOrder.deliveryQty }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">Order Date</span>
+          <span class="om-details-value">{{ detailsOrder.orderDate | date:'MM/dd/yyyy' }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">Delivery Date</span>
+          <span class="om-details-value">{{ detailsOrder.deliveryDate | date:'MM/dd/yyyy' }}</span>
+        </div>
+        <div class="om-details-row">
+          <span class="om-details-label">Status</span>
+          <span class="om-details-value">
+            <span class="ib-status-badge" [ngClass]="{
+              'ib-status-badge--success': detailsOrder.status === 'Shipped',
+              'ib-status-badge--warning': detailsOrder.status === 'Pending',
+              'ib-status-badge--danger':  detailsOrder.status === 'Credit Hold' || detailsOrder.status === 'Cancelled'
+            }">{{ detailsOrder.status }}</span>
+          </span>
+        </div>
+      </div>
+    </div>
+    <div class="ib-modal-footer">
+      <button type="button" class="btn ib-btn-secondary" (click)="closeDetailsModal()">Close</button>
+    </div>
+  </div>
+</div>

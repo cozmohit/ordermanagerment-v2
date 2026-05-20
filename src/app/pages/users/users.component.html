@@ -1,0 +1,55 @@
+<div class="container-fluid">
+  <div class="ib-page-header">
+    <h2 class="ib-page-header__title">Users</h2>
+  </div>
+
+  <div class="ib-section-card">
+    <div class="ib-section-card__header">
+      <h5 class="ib-section-card__title">User Directory</h5>
+      <span class="ib-table-toolbar__meta">{{ users.length }} users</span>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+          <thead class="ib-table-header">
+            <tr>
+              <th class="py-2 px-3">User ID</th>
+              <th class="py-2">Name</th>
+              <th class="py-2">Email</th>
+              <th class="py-2">Department</th>
+              <th class="py-2">Territory</th>
+              <th class="py-2">Last Login</th>
+              <th class="py-2">Status</th>
+              <th class="py-2" style="min-width: 200px;">Role</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let user of users">
+              <td class="px-3 text-muted small">{{ user.id }}</td>
+              <td class="fw-bold">{{ user.name }}</td>
+              <td class="text-muted small">{{ user.email }}</td>
+              <td>{{ user.department }}</td>
+              <td>{{ user.territory }}</td>
+              <td class="text-muted small">{{ user.lastLogin }}</td>
+              <td>
+                <span class="ib-status-badge"
+                  [class.ib-status-badge--success]="user.status === 'Active'"
+                  [class.ib-status-badge--danger]="user.status === 'Inactive'">
+                  {{ user.status }}
+                </span>
+              </td>
+              <td>
+                <select class="form-select form-select-sm bg-light users-role-select"
+                  [(ngModel)]="user.role"
+                  [name]="'role_' + user.id"
+                  (ngModelChange)="onRoleChange(user, $event)">
+                  <option *ngFor="let r of roleOptions" [value]="r">{{ r }}</option>
+                </select>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>

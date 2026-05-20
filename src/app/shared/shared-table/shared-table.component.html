@@ -1,0 +1,61 @@
+<div class="ib-section-card ib-shared-table">
+  <div
+    *ngIf="showHeader && (title || showSearch || showAddButton)"
+    class="ib-table-toolbar ib-shared-table__toolbar"
+  >
+    <div *ngIf="title" class="ib-shared-table__title">{{ title }}</div>
+
+    <div class="ib-shared-table__actions">
+      <ng-content select="[headerExtras]"></ng-content>
+
+      <input
+        *ngIf="showSearch"
+        type="text"
+        [placeholder]="searchPlaceholder"
+        class="form-control ib-shared-table__search"
+        [(ngModel)]="searchTerm"
+        (ngModelChange)="onSearchTermChange($event)"
+        name="sharedTableSearch"
+      />
+
+      <button *ngIf="showAddButton" type="button" class="btn btn-primary" (click)="onAddClick()">
+        {{ addButtonLabel }}
+      </button>
+    </div>
+  </div>
+
+  <div class="card-body p-0">
+    <div *ngIf="isLoading" class="ib-empty-state ib-shared-table__loading">
+      <div class="spinner-border text-primary mb-3" role="status" aria-hidden="true"></div>
+      <p class="mb-0">{{ loadingText }}</p>
+    </div>
+
+    <div *ngIf="!isLoading" class="table-responsive ib-shared-table__body">
+      <table [class]="tableClass">
+        <thead [class]="theadClass" *ngIf="useProjectedHead || headers.length > 0">
+          <tr *ngIf="!useProjectedHead">
+            <th *ngFor="let header of headers" scope="col">{{ header }}</th>
+          </tr>
+          <ng-content select="[tableHeadRows]"></ng-content>
+        </thead>
+
+        <tbody>
+          <ng-content select="[tableRows]"></ng-content>
+
+          <tr *ngIf="isEmpty">
+            <td [attr.colspan]="columnCount || headers.length || 1" class="p-0 border-0">
+              <div class="ib-empty-state ib-shared-table__empty">
+                <ng-content select="[emptyState]"></ng-content>
+                <p class="mb-0">{{ emptyText }}</p>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="ib-shared-table__footer">
+      <ng-content select="[tableFooter]"></ng-content>
+    </div>
+  </div>
+</div>

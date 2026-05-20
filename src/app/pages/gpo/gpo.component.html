@@ -1,0 +1,261 @@
+<div class="container-fluid">
+  <div class="ib-page-header">
+    <h2 class="ib-page-header__title">GPO</h2>
+  </div>
+
+  <div class="ib-section-card">
+    <div class="ib-section-card__header">
+      <h5 class="ib-section-card__title">GPO Directory</h5>
+      <span class="ib-table-toolbar__meta">{{ rows.length }} accounts</span>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle mb-0 ib-data-table gpo-table">
+          <thead class="ib-table-header">
+            <tr>
+              <th class="py-2 px-3" style="white-space:nowrap;">BP Number</th>
+              <th class="py-2" style="white-space:nowrap;">GPO (L1)</th>
+              <th class="py-2" style="white-space:nowrap;">Sub-GPO (L2)</th>
+              <th class="py-2" style="white-space:nowrap;">Group (L3)</th>
+              <th class="py-2" style="white-space:nowrap;">Sub-Group (L4)</th>
+              <th class="py-2" style="white-space:nowrap;">Practice (L5)</th>
+              <th class="py-2">Channel</th>
+              <th class="py-2 text-center px-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of rows">
+              <td class="px-3 fw-bold text-primary" style="white-space:nowrap;">{{ row.bpNumber }}</td>
+              <td>
+                <span *ngIf="row.gpoL1" class="ib-chip">{{ row.gpoL1 }}</span>
+              </td>
+              <td style="white-space:nowrap;">
+                <span *ngIf="row.subGpoL2" class="gpo-text-sm">{{ row.subGpoL2 }}</span>
+              </td>
+              <td style="white-space:nowrap;">
+                <span *ngIf="row.groupL3" class="gpo-text-sm">{{ row.groupL3 }}</span>
+              </td>
+              <td style="white-space:nowrap;">
+                <span *ngIf="row.subGroupL4" class="gpo-text-sm">{{ row.subGroupL4 }}</span>
+              </td>
+              <td style="white-space:nowrap;">
+                <span *ngIf="row.practiceL5" class="gpo-text-sm">{{ row.practiceL5 }}</span>
+              </td>
+              <td>
+                <span class="ib-chip">{{ row.channel }}</span>
+              </td>
+              <td class="text-center px-3" style="white-space:nowrap;">
+                <button class="ib-icon-btn me-1" title="Edit row" (click)="openEdit(row)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+                <!-- <button class="ib-icon-btn" title="Ship To Details" (click)="openDetails(row)">
+                  <i class="bi bi-card-list"></i>
+                </button> -->
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── Edit Modal ─────────────────────────────────────────── -->
+<div *ngIf="editingRow" class="ib-modal-overlay" (click)="closeEdit()">
+  <div class="ib-modal-shell gpo-edit-modal" (click)="$event.stopPropagation()">
+
+    <div class="ib-modal-header">
+      <div class="d-flex flex-column gap-1">
+        <h5 class="ib-modal-title mb-0">Edit Account</h5>
+        <span class="text-muted small">BP {{ editingRow.bpNumber }}</span>
+      </div>
+      <button type="button" class="btn-close" (click)="closeEdit()"></button>
+    </div>
+
+    <div class="ib-modal-body">
+      <form #gpoEditForm="ngForm">
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">BP Number</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.bpNumber" name="bpNumber">
+          </div>
+
+          <div class="col-md-8">
+            <label class="form-label fw-bold small text-muted">Ship To Name</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.shipToName" name="shipToName">
+          </div>
+
+          <div class="col-md-8">
+            <label class="form-label fw-bold small text-muted">Ship To Address 1</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.shipToAddress1" name="shipToAddress1">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">City</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.shipToCity" name="shipToCity">
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label fw-bold small text-muted">State</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.shipToState" name="shipToState">
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label fw-bold small text-muted">Zip</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.shipToZip" name="shipToZip">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Channel</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.channel" name="channel">
+          </div>
+
+          <div class="col-12">
+            <label class="form-label fw-bold small text-muted">GPO (L1)</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.gpoL1" name="gpoL1">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold small text-muted">Sub-GPO (Network) (L2)</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.subGpoL2" name="subGpoL2">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold small text-muted">Group (L3)</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.groupL3" name="groupL3">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold small text-muted">Sub-Group (L4)</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.subGroupL4" name="subGroupL4">
+          </div>
+          <div class="col-12">
+            <label class="form-label fw-bold small text-muted">Practice (L5)</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.practiceL5" name="practiceL5">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold small text-muted">Full Account Name</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.fullAccountName" name="fullAccountName">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold small text-muted">Community / Academic</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.communityAcademic" name="communityAcademic">
+          </div>
+
+          <div class="col-md-6">
+            <label class="form-label fw-bold small text-muted">Notes</label>
+            <input type="text" class="form-control bg-light"
+              [(ngModel)]="editForm.notes" name="notes">
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+    <div class="gpo-modal-footer">
+      <button type="button" class="btn ib-btn-secondary" (click)="closeEdit()">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="saveEdit()">Save Changes</button>
+    </div>
+
+  </div>
+</div>
+
+
+<!-- ── Details Modal ──────────────────────────────────────── -->
+<div *ngIf="detailsRow" class="ib-modal-overlay" (click)="closeDetails()">
+  <div class="ib-modal-shell" style="max-width: 460px; max-height: 85vh; display: flex; flex-direction: column;" (click)="$event.stopPropagation()">
+
+    <div class="ib-modal-header">
+      <div class="d-flex flex-column gap-1">
+        <h5 class="ib-modal-title mb-0">Account Details</h5>
+        <span class="text-muted small">BP {{ detailsRow.bpNumber }}</span>
+      </div>
+      <button type="button" class="btn-close" (click)="closeDetails()"></button>
+    </div>
+
+    <div class="ib-modal-body" style="overflow-y: auto; flex: 1;">
+      <div class="gpo-details-grid">
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">BP Number</span>
+          <span class="gpo-details-value fw-bold text-primary">{{ detailsRow.bpNumber || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">Ship To Name</span>
+          <span class="gpo-details-value fw-bold">{{ detailsRow.shipToName || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">Address</span>
+          <span class="gpo-details-value">{{ detailsRow.shipToAddress1 || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">City</span>
+          <span class="gpo-details-value">{{ detailsRow.shipToCity || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">State</span>
+          <span class="gpo-details-value fw-bold">{{ detailsRow.shipToState || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">ZIP</span>
+          <span class="gpo-details-value">{{ detailsRow.shipToZip || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">Channel</span>
+          <span class="gpo-details-value">{{ detailsRow.channel || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">GPO (L1)</span>
+          <span class="gpo-details-value">{{ detailsRow.gpoL1 || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">Sub-GPO (L2)</span>
+          <span class="gpo-details-value">{{ detailsRow.subGpoL2 || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">Group (L3)</span>
+          <span class="gpo-details-value">{{ detailsRow.groupL3 || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">Sub-Group (L4)</span>
+          <span class="gpo-details-value">{{ detailsRow.subGroupL4 || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">Practice (L5)</span>
+          <span class="gpo-details-value">{{ detailsRow.practiceL5 || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">Full Account Name</span>
+          <span class="gpo-details-value fw-bold">{{ detailsRow.fullAccountName || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">Community / Academic</span>
+          <span class="gpo-details-value">{{ detailsRow.communityAcademic || '—' }}</span>
+        </div>
+        <div class="gpo-details-row">
+          <span class="gpo-details-label">Notes</span>
+          <span class="gpo-details-value">{{ detailsRow.notes || '—' }}</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="gpo-modal-footer">
+      <button type="button" class="btn ib-btn-secondary" (click)="closeDetails()">Close</button>
+    </div>
+
+  </div>
+</div>

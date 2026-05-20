@@ -1,0 +1,285 @@
+<div class="container-fluid">
+  <!-- <div class="ib-page-header">
+     <div>
+      <p class="ib-page-header__eyebrow">Commercial Overview</p>
+      <h2 class="ib-page-header__title">ANKTIVA Commercial &amp; Patient Access Portal</h2>
+      <p class="ib-page-header__subtitle">Report Date: April 20, 2026 | Week Start Date: April 18, 2026</p>
+    </div> 
+    <div class="ib-page-header__actions">
+      <button class="btn ib-btn-secondary dashboard-secondary-btn">
+        <i class="bi bi-arrow-clockwise me-1"></i>Update
+      </button>
+      <button class="btn btn-primary dashboard-primary-btn">
+        <i class="bi bi-envelope me-1"></i>Create Email
+      </button>
+    </div>
+  </div> -->
+
+  <div class="row g-3 mb-3">
+    <div class="col-12">
+      <!-- <p class="text-uppercase fw-bold small text-muted mb-2">Yesterday</p> -->
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-3 h-100 ib-kpi-accent dashboard-kpi-card">
+        <div class="card-body py-3">
+          <p class="text-muted mb-1 small fw-bold">ICS Sales</p>
+          <h4 class="fw-bold mb-0 ib-text-accent">{{ kpis.daily_revenue | currency:'USD':'symbol':'1.0-0' }}</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-3 h-100 dashboard-kpi-card">
+        <div class="card-body py-3">
+          <p class="text-muted mb-1 small fw-bold">IB Care Enrollments</p>
+          <h4 class="fw-bold mb-0">1</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-3 h-100 dashboard-kpi-card">
+        <div class="card-body py-3">
+          <p class="text-muted mb-1 small fw-bold">Accredo Enrollments</p>
+          <h4 class="fw-bold mb-0">0</h4>
+        </div>
+      </div>
+    </div>
+    <div class="col-md-3">
+      <div class="card border-0 shadow-sm rounded-3 h-100 dashboard-kpi-card">
+        <div class="card-body py-3">
+          <p class="text-muted mb-1 small fw-bold">YTD Revenue</p>
+          <h4 class="fw-bold mb-0 text-success">{{ kpis.ytd_revenue | currency:'USD':'symbol':'1.0-0' }}</h4>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="row g-3 mb-3">
+    <div class="col-lg-7">
+      <div class="card border-0 shadow-sm rounded-3">
+        <div class="card-body p-0">
+          <div class="px-3 py-2 ib-table-header d-flex align-items-center justify-content-between gap-2">
+            <span class="fw-bold small">WEEKLY SALES</span>
+            <div class="btn-group btn-group-sm" role="group" aria-label="Weekly sales view">
+              <button type="button" class="btn btn-outline-primary" [class.active]="sectionView.weeklySales === 'table'" (click)="setSectionView('weeklySales', 'table')">Table</button>
+              <button type="button" class="btn btn-outline-primary" [class.active]="sectionView.weeklySales === 'chart'" (click)="setSectionView('weeklySales', 'chart')">Chart</button>
+            </div>
+          </div>
+          <div *ngIf="sectionView.weeklySales === 'table'; else weeklySalesChartTpl" class="table-responsive">
+            <table class="table table-sm table-bordered mb-0 ib-data-table">
+              <thead class="table-light">
+                <tr>
+                  <th class="py-1 px-2"></th>
+                  <th class="text-center py-1">Fri/Sat/Sun</th>
+                  <th class="text-center py-1">Mon</th>
+                  <th class="text-center py-1">Tue</th>
+                  <th class="text-center py-1">Wed</th>
+                  <th class="text-center py-1">Thu</th>
+                  <th class="text-center py-1 fw-bold">TOTAL</th>
+                </tr>
+              </thead>
+              <tbody>
+                <tr *ngFor="let row of weeklySales" [class.fw-bold]="row.label === 'TOTAL'" [class.table-light]="row.label === 'TOTAL'">
+                  <td class="px-2">{{ row.label }}</td>
+                  <td class="text-center">{{ row.fri }}</td>
+                  <td class="text-center">{{ row.mon }}</td>
+                  <td class="text-center">{{ row.tue }}</td>
+                  <td class="text-center">{{ row.wed }}</td>
+                  <td class="text-center">{{ row.thu }}</td>
+                  <td class="text-center fw-bold">{{ row.total }}</td>
+                </tr>
+
+                <tr *ngFor="let row of weeklySummary" [class.table-light]="row.label === 'Sales $'">
+                  <td class="px-2 fw-bold">{{ row.label }}</td>
+                  <td [class.text-end]="row.label === 'Sales $'" [class.text-center]="row.label !== 'Sales $'">
+                    <ng-container *ngIf="row.label === 'Sales $'; else weeklyPlainFri">{{ row.fri | currency:'USD':'symbol':'1.0-0' }}</ng-container>
+                    <ng-template #weeklyPlainFri>{{ row.fri }}</ng-template>
+                  </td>
+                  <td [class.text-end]="row.label === 'Sales $'" [class.text-center]="row.label !== 'Sales $'">
+                    <ng-container *ngIf="row.label === 'Sales $'; else weeklyPlainMon">{{ row.mon | currency:'USD':'symbol':'1.0-0' }}</ng-container>
+                    <ng-template #weeklyPlainMon>{{ row.mon }}</ng-template>
+                  </td>
+                  <td [class.text-end]="row.label === 'Sales $'" [class.text-center]="row.label !== 'Sales $'">
+                    <ng-container *ngIf="row.label === 'Sales $'; else weeklyPlainTue">{{ row.tue | currency:'USD':'symbol':'1.0-0' }}</ng-container>
+                    <ng-template #weeklyPlainTue>{{ row.tue }}</ng-template>
+                  </td>
+                  <td [class.text-end]="row.label === 'Sales $'" [class.text-center]="row.label !== 'Sales $'">
+                    <ng-container *ngIf="row.label === 'Sales $'; else weeklyPlainWed">{{ row.wed | currency:'USD':'symbol':'1.0-0' }}</ng-container>
+                    <ng-template #weeklyPlainWed>{{ row.wed }}</ng-template>
+                  </td>
+                  <td [class.text-end]="row.label === 'Sales $'" [class.text-center]="row.label !== 'Sales $'">
+                    <ng-container *ngIf="row.label === 'Sales $'; else weeklyPlainThu">{{ row.thu | currency:'USD':'symbol':'1.0-0' }}</ng-container>
+                    <ng-template #weeklyPlainThu>{{ row.thu }}</ng-template>
+                  </td>
+                  <td [class.text-end]="row.label === 'Sales $'" [class.text-center]="row.label !== 'Sales $'" class="fw-bold" [class.text-success]="row.label === 'Sales $'">
+                    <ng-container *ngIf="row.label === 'Sales $'; else weeklyPlainTotal">{{ row.total | currency:'USD':'symbol':'1.0-0' }}</ng-container>
+                    <ng-template #weeklyPlainTotal>{{ row.total }}</ng-template>
+                  </td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+          <ng-template #weeklySalesChartTpl>
+            <div class="p-3">
+              <div class="dashboard-chart" #weeklySalesChart></div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+
+    <div class="col-lg-5">
+      <div class="card border-0 shadow-sm rounded-3 h-100">
+        <div class="px-3 py-2 ib-table-header d-flex align-items-center justify-content-between gap-2">
+          <span class="fw-bold small">TERRITORY PERFORMANCE</span>
+          <div class="btn-group btn-group-sm" role="group" aria-label="Territory performance view">
+            <button type="button" class="btn btn-outline-primary" [class.active]="sectionView.territoryPerformance === 'table'" (click)="setSectionView('territoryPerformance', 'table')">Table</button>
+            <button type="button" class="btn btn-outline-primary" [class.active]="sectionView.territoryPerformance === 'chart'" (click)="setSectionView('territoryPerformance', 'chart')">Chart</button>
+          </div>
+        </div>
+        <div class="card-body p-0">
+          <div *ngIf="sectionView.territoryPerformance === 'table'; else territoryPerformanceChartTpl" class="table-responsive">
+            <table class="table table-sm table-bordered mb-0 ib-data-table">
+              <thead class="table-light">
+                <tr>
+                  <th class="py-1 px-2">Territory</th>
+                  <th class="py-1">Director</th>
+                  <th class="text-end py-1">YTD Revenue</th>
+                </tr>
+              </thead>
+              <tbody>
+                @for (t of territories; track t.id) {
+                  <tr>
+                    <td class="px-2 fw-bold">{{ t.name }}</td>
+                    <td class="small text-muted">{{ t.director }}</td>
+                    <td class="text-end fw-bold text-success">{{ t.revenue | currency:'USD':'symbol':'1.0-0' }}</td>
+                  </tr>
+                }
+              </tbody>
+            </table>
+          </div>
+          <ng-template #territoryPerformanceChartTpl>
+            <div class="p-3">
+              <div class="dashboard-chart dashboard-chart--tall" #territoryPerformanceChart></div>
+            </div>
+          </ng-template>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-3 mb-3">
+    <div class="px-3 py-2 ib-table-header d-flex align-items-center justify-content-between gap-2">
+      <span class="fw-bold small">YEARLY SALES BREAKDOWN</span>
+      <div class="btn-group btn-group-sm" role="group" aria-label="Yearly sales breakdown view">
+        <button type="button" class="btn btn-outline-primary" [class.active]="sectionView.yearlySalesBreakdown === 'table'" (click)="setSectionView('yearlySalesBreakdown', 'table')">Table</button>
+        <button type="button" class="btn btn-outline-primary" [class.active]="sectionView.yearlySalesBreakdown === 'chart'" (click)="setSectionView('yearlySalesBreakdown', 'chart')">Chart</button>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <div *ngIf="sectionView.yearlySalesBreakdown === 'table'; else yearlySalesBreakdownChartTpl" class="table-responsive">
+        <table class="table table-sm table-bordered mb-0 ib-data-table">
+          <thead class="ib-table-subhead">
+            <tr>
+              <th class="py-1 px-2" rowspan="2">Qtr</th>
+              <th class="py-1" rowspan="2">Period</th>
+              <th class="py-1 text-center" colspan="3">Company Sales</th>
+              <th class="py-1 text-center" colspan="3">Field Sales</th>
+              <th class="py-1 text-center" colspan="2">Enrollments</th>
+            </tr>
+            <tr class="ib-table-subhead">
+              <th class="py-1 text-center">Shipped</th>
+              <th class="py-1 text-center">Pending</th>
+              <th class="py-1 text-center">Total Units</th>
+              <th class="py-1 text-center">ICS Units</th>
+              <th class="py-1 text-end">ICS Sales $</th>
+              <th class="py-1 text-end">Accredo Sales $</th>
+              <th class="py-1 text-center">IB Care</th>
+              <th class="py-1 text-center">Accredo</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of quarterlyBreakdown" [class.fw-bold]="row.isTotal" [class.table-light]="row.isTotal">
+              <td class="px-2 fw-bold small">{{ row.quarter }}</td>
+              <td class="small">{{ row.period }}</td>
+              <td class="text-center">{{ row.shipped }}</td>
+              <td class="text-center">{{ row.pending }}</td>
+              <td class="text-center fw-bold">{{ row.totalUnits }}</td>
+              <td class="text-center">{{ row.icsUnits }}</td>
+              <td class="text-end">{{ row.icsSales | currency:'USD':'symbol':'1.0-0' }}</td>
+              <td class="text-end">{{ row.accredoSales | currency:'USD':'symbol':'1.0-0' }}</td>
+              <td class="text-center">{{ row.ibCare }}</td>
+              <td class="text-center">{{ row.accredo }}</td>
+            </tr>
+            <tr class="fw-bold dashboard-ytd-row">
+              <td class="px-2">{{ ytdTotals.quarter }}</td>
+              <td class="fw-bold">{{ ytdTotals.period }}</td>
+              <td class="text-center">{{ ytdTotals.shipped }}</td>
+              <td class="text-center">{{ ytdTotals.pending }}</td>
+              <td class="text-center fw-bold">{{ ytdTotals.totalUnits }}</td>
+              <td class="text-center">{{ ytdTotals.icsUnits }}</td>
+              <td class="text-end text-success">{{ ytdTotals.icsSales | currency:'USD':'symbol':'1.0-0' }}</td>
+              <td class="text-end text-success">{{ ytdTotals.accredoSales | currency:'USD':'symbol':'1.0-0' }}</td>
+              <td class="text-center">{{ ytdTotals.ibCare }}</td>
+              <td class="text-center">{{ ytdTotals.accredo }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #yearlySalesBreakdownChartTpl>
+        <div class="p-3">
+          <div class="dashboard-chart dashboard-chart--xl" #yearlySalesBreakdownChart></div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+
+  <div class="card border-0 shadow-sm rounded-3">
+    <div class="px-3 py-2 ib-table-header d-flex align-items-center justify-content-between gap-2">
+      <span class="fw-bold small">TERRITORY &amp; REP PERFORMANCE</span>
+      <div class="btn-group btn-group-sm" role="group" aria-label="Rep performance view">
+        <button type="button" class="btn btn-outline-primary" [class.active]="sectionView.repPerformance === 'table'" (click)="setSectionView('repPerformance', 'table')">Table</button>
+        <button type="button" class="btn btn-outline-primary" [class.active]="sectionView.repPerformance === 'chart'" (click)="setSectionView('repPerformance', 'chart')">Chart</button>
+      </div>
+    </div>
+    <div class="card-body p-0">
+      <div *ngIf="sectionView.repPerformance === 'table'; else repPerformanceChartTpl" class="table-responsive">
+        <table class="table table-sm table-bordered mb-0 ib-data-table">
+          <thead class="ib-table-subhead">
+            <tr>
+              <th class="py-1 px-2" rowspan="2">Territory</th>
+              <th class="py-1" rowspan="2">Sales Rep</th>
+              <th class="py-1 text-center" colspan="2">Current Week</th>
+              <th class="py-1 text-center" colspan="2">Current Quarter</th>
+              <th class="py-1 text-center" colspan="2">YTD</th>
+            </tr>
+            <tr class="ib-table-subhead">
+              <th class="py-1 text-center">Enrollm.</th>
+              <th class="py-1 text-center">Units Ordered</th>
+              <th class="py-1 text-center">Enrollm.</th>
+              <th class="py-1 text-center">Units Ordered</th>
+              <th class="py-1 text-center">Enrollm.</th>
+              <th class="py-1 text-center">Units Ordered</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of repPerformance" [class.fw-bold]="row.territory !== ''">
+              <td class="px-2" [class.ib-territory-cell]="row.territory !== ''" [class.fw-bold]="row.territory !== ''">{{ row.territory }}</td>
+              <td>{{ row.rep }}</td>
+              <td class="text-center">{{ row.cwEnroll }}</td>
+              <td class="text-center">{{ row.cwUnits }}</td>
+              <td class="text-center">{{ row.cqEnroll }}</td>
+              <td class="text-center fw-bold">{{ row.cqUnits }}</td>
+              <td class="text-center">{{ row.ytdEnroll }}</td>
+              <td class="text-center fw-bold text-success">{{ row.ytdUnits }}</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+      <ng-template #repPerformanceChartTpl>
+        <div class="p-3">
+          <div class="dashboard-chart dashboard-chart--rep" #repPerformanceChart></div>
+        </div>
+      </ng-template>
+    </div>
+  </div>
+</div>

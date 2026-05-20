@@ -1,0 +1,223 @@
+.provider-kpi-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.provider-kpi-card {
+  border: 1px solid var(--ib-border);
+  border-radius: var(--ib-radius-lg);
+
+  .card-body {
+    padding: 1rem 1.1rem;
+  }
+}
+
+.provider-kpi-card--accent {
+  border-left: 4px solid var(--ib-navy);
+}
+
+.provider-kpi-card__label {
+  color: var(--ib-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+}
+
+.provider-kpi-card__value {
+  color: var(--ib-navy);
+  margin: 0;
+}
+
+.provider-kpi-card__value--small {
+  font-size: 1rem;
+  line-height: 1.4;
+}
+
+.ib-filter-card--compact {
+  padding: 0.8rem 1rem;
+}
+
+.ib-compact-filter__label {
+  font-size: 0.68rem;
+  letter-spacing: 0.04em;
+  margin-bottom: 0.28rem;
+  text-transform: uppercase;
+}
+
+.ib-compact-filter__control {
+  font-size: 0.82rem;
+  min-height: 34px;
+  padding-bottom: 0.38rem;
+  padding-top: 0.38rem;
+}
+
+.provider-profile-summary {
+  border: 1px solid var(--ib-border);
+  border-radius: var(--ib-radius-lg);
+}
+
+.provider-profile-summary__eyebrow {
+  color: var(--ib-muted);
+  font-size: 0.74rem;
+  font-weight: 700;
+  letter-spacing: 0.24em;
+  margin-bottom: 0.3rem;
+  text-transform: uppercase;
+}
+
+.provider-profile-summary__title {
+  color: var(--ib-navy);
+}
+
+.provider-profile-summary__actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+}
+
+.provider-profile-tabs {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.75rem;
+
+  .btn {
+    background: #fff;
+    border: 1px solid var(--ib-border);
+    border-radius: 999px;
+    color: var(--ib-muted);
+    font-size: 0.9rem;
+    font-weight: 600;
+    padding: 0.55rem 1rem;
+  }
+
+  .btn.active {
+    background: rgba(10, 36, 99, 0.08);
+    border-color: var(--ib-navy);
+    color: var(--ib-navy);
+  }
+}
+
+.provider-detail-list {
+  display: grid;
+  gap: 0.9rem;
+
+  div {
+    border: 1px solid #edf2f7;
+    border-radius: 12px;
+    padding: 0.9rem 1rem;
+  }
+
+  span {
+    color: var(--ib-muted);
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+  }
+
+  strong {
+    color: var(--ib-navy);
+    font-weight: 600;
+  }
+}
+
+.provider-performance-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+}
+
+.provider-performance-card {
+  border: 1px solid #edf2f7;
+  border-radius: 14px;
+  display: grid;
+  gap: 0.35rem;
+  padding: 1rem 1.1rem;
+
+  span {
+    color: var(--ib-muted);
+    font-size: 0.82rem;
+  }
+
+  strong {
+    color: var(--ib-navy);
+  }
+}
+
+.provider-mapping-summary {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+
+  div {
+    border: 1px solid #edf2f7;
+    border-radius: 14px;
+    padding: 1rem 1.1rem;
+  }
+
+  span {
+    color: var(--ib-muted);
+    display: block;
+    font-size: 0.76rem;
+    font-weight: 700;
+    margin-bottom: 0.2rem;
+    text-transform: uppercase;
+  }
+
+  strong {
+    color: var(--ib-navy);
+  }
+}
+
+.provider-action-group {
+  display: inline-flex;
+  flex-wrap: nowrap;
+  gap: 0.4rem;
+  white-space: nowrap;
+}
+
+.provider-timeline {
+  display: grid;
+  gap: 1rem;
+}
+
+.provider-timeline__item {
+  display: grid;
+  gap: 0.85rem;
+  grid-template-columns: 18px minmax(0, 1fr);
+}
+
+.provider-timeline__marker {
+  background: var(--ib-navy);
+  border-radius: 999px;
+  height: 14px;
+  margin-top: 0.45rem;
+  position: relative;
+  width: 14px;
+}
+
+.provider-timeline__marker::after {
+  background: #d6deed;
+  content: '';
+  height: calc(100% + 2.2rem);
+  left: 50%;
+  position: absolute;
+  top: 100%;
+  transform: translateX(-50%);
+  width: 2px;
+}
+
+.provider-timeline__item:last-child .provider-timeline__marker::after {
+  display: none;
+}
+
+.provider-timeline__content {
+  background: #fff;
+  border: 1px solid #edf2f7;
+  border-radius: 14px;
+  padding: 1rem 1.1rem;
+}

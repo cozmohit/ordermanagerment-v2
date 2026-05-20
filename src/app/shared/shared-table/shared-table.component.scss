@@ -1,0 +1,60 @@
+.ib-shared-table {
+  overflow: hidden;
+}
+
+.ib-shared-table__toolbar {
+  min-height: 4.25rem;
+}
+
+.ib-shared-table__title {
+  color: var(--ib-navy);
+  font-size: 1rem;
+  font-weight: 700;
+}
+
+.ib-shared-table__actions {
+  align-items: center;
+  display: flex;
+  gap: 0.75rem;
+  margin-left: auto;
+}
+
+.ib-shared-table__search {
+  max-width: 18rem;
+}
+
+.ib-shared-table__body {
+  max-height: 38rem;
+}
+
+.ib-shared-table__loading {
+  min-height: 16rem;
+}
+
+.ib-shared-table__empty {
+  min-height: 12rem;
+}
+
+.ib-shared-table__footer {
+  padding: 0 1.25rem 1rem;
+}
+
+.ib-shared-table__footer:empty {
+  display: none;
+}
+
+@media (max-width: 991.98px) {
+  .ib-shared-table__toolbar {
+    align-items: flex-start;
+    flex-direction: column;
+  }
+
+  .ib-shared-table__actions {
+    margin-left: 0;
+    width: 100%;
+  }
+
+  .ib-shared-table__search {
+    max-width: none;
+  }
+}

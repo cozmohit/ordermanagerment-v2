@@ -1,0 +1,33 @@
+.container-fluid {
+  background: transparent;
+}
+
+.app-shell {
+  background: transparent;
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+.app-content-row {
+  min-height: 0;
+}
+
+.ib-main-surface {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+}
+
+.app-main {
+  min-width: 0;
+}
+
+.app-sidebar-column {
+  flex: 0 0 280px;
+  max-width: 280px;
+  transition: flex-basis 0.2s ease, max-width 0.2s ease;
+}
+
+.app-sidebar-column--collapsed {
+  flex-basis: 84px;
+  max-width: 84px;
+}

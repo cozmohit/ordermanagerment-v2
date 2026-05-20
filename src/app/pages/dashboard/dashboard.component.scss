@@ -1,0 +1,38 @@
+.dashboard-secondary-btn {
+  color: var(--ib-navy);
+  font-weight: 700;
+}
+
+.dashboard-primary-btn {
+  box-shadow: var(--ib-shadow-sm);
+}
+
+.dashboard-kpi-card {
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.dashboard-kpi-card:hover {
+  box-shadow: var(--ib-shadow-md);
+  transform: translateY(-2px);
+}
+
+.dashboard-ytd-row {
+  background-color: #e7f7ee;
+}
+
+.dashboard-chart {
+  width: 100%;
+  height: 280px;
+}
+
+.dashboard-chart--tall {
+  height: 360px;
+}
+
+.dashboard-chart--xl {
+  height: 420px;
+}
+
+.dashboard-chart--rep {
+  height: 360px;
+}

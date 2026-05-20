@@ -1,0 +1,468 @@
+<div class="container-fluid position-relative">
+  <div class="ib-page-header">
+    <div>
+      <h2 class="ib-page-header__title">Sales Team</h2>
+    </div>
+    <div class="ib-page-header__actions">
+      <button class="btn ib-btn-secondary" *ngIf="activeTab !== 'representatives'" (click)="setTab('representatives', selectedRep?.name)">
+        <i class="bi bi-list-ul"></i> Representatives
+      </button>
+      <button class="btn btn-primary" (click)="startCreateRep()">
+        <i class="bi bi-person-plus"></i> Create Rep
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'representatives'">
+    <div class="ib-filter-card mb-4">
+      <div class="row g-3 align-items-end">
+        <div class="col-lg-4">
+          <label class="form-label fw-bold small text-muted">Search</label>
+          <input class="form-control bg-light" [(ngModel)]="repFilters.search" name="repSearch" placeholder="Rep name, territory, area id..." />
+        </div>
+        <div class="col-lg-3">
+          <label class="form-label fw-bold small text-muted">Territory</label>
+          <select class="form-select bg-light" [(ngModel)]="repFilters.territory" name="repTerritory">
+            <option *ngFor="let option of territoryOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-lg-3">
+          <label class="form-label fw-bold small text-muted">Status</label>
+          <select class="form-select bg-light" [(ngModel)]="repFilters.status" name="repStatus">
+            <option value="All">All</option>
+            <option value="Active">Active</option>
+            <option value="Director">Director</option>
+          </select>
+        </div>
+        <div class="col-lg-2 d-flex justify-content-end">
+          <button class="btn ib-btn-secondary" type="button" (click)="startCreateRep()">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
+      </div>
+    </div>
+
+    <div class="ib-section-card mb-4">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Representative Directory</h5>
+          <!-- <p class="ib-section-card__meta">Search reps, review workload and performance, and open profile-based rep views.</p> -->
+        </div>
+        <span class="ib-table-toolbar__meta">{{ repDirectoryRows.length }} reps</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+            <thead class="ib-table-header">
+              <tr>
+                <th class="py-2 px-3">Rep Name</th>
+                <th class="py-2">Territory</th>
+                <th class="py-2">Region</th>
+                <th class="py-2 text-center">Assigned Physicians</th>
+                <th class="py-2 text-center">Active Patients</th>
+                <th class="py-2 text-center">Orders</th>
+                <th class="py-2 text-end">Revenue</th>
+                <th class="py-2 text-center">Achievement %</th>
+                <th class="py-2">Status</th>
+                <th class="py-2 px-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of repDirectoryRows">
+                <td class="px-3 ">{{ row.rep.name }}</td>
+                <td>{{ row.territory }}</td>
+                <td class="text-muted">{{ row.region }}</td>
+                <td class="text-center">{{ row.assignedPhysicians }}</td>
+                <td class="text-center">{{ row.activePatients }}</td>
+                <td class="text-center">{{ row.orders }}</td>
+                <td class="text-end text-success">{{ row.revenue | currency:'USD':'symbol':'1.0-0' }}</td>
+                <td class="text-center ">{{ row.achievementPct }}%</td>
+                <td>
+                  <span class="ib-status-badge" [ngClass]="row.status === 'Active' ? 'ib-status-badge--success' : 'ib-status-badge--info'">{{ row.status }}</span>
+                </td>
+                <td class="px-3 text-end">
+                  <div class="sales-team-action-group justify-content-end">
+                    <button class="ib-icon-btn" type="button" title="View Profile" aria-label="View Profile" (click)="openRepProfile(row.rep.name)">
+                      <i class="bi bi-person-vcard"></i>
+                    </button>
+                    <button class="ib-icon-btn" type="button" title="Edit Rep" aria-label="Edit Rep" (click)="editRep(row.rep)">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <!-- <button class="ib-icon-btn" type="button" title="Assign Territory" aria-label="Assign Territory" (click)="assignTerritory(row.rep.name)">
+                      <i class="bi bi-map"></i>
+                    </button> -->
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <div *ngIf="activeTab === 'profile' && repProfileSummary" class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Representative Profile</h5>
+          <!-- <p class="ib-section-card__meta">Overview, territory ownership, coverage, and performance for the selected rep.</p> -->
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="card border-0 shadow-sm sales-team-profile-summary mb-4">
+          <div class="card-body">
+            <div class="d-flex flex-wrap justify-content-between gap-3">
+              <div>
+                <p class="sales-team-profile-summary__eyebrow">Rep Profile</p>
+                <h3 class="sales-team-profile-summary__title mb-1">{{ repProfileSummary.rep.name }}</h3>
+                <p class="text-muted mb-0">{{ repProfileSummary.rep.position }} | {{ repProfileSummary.territory }}</p>
+              </div>
+              <div class="sales-team-profile-summary__meta">
+                <div><span>Physicians</span><strong>{{ repProfileSummary.physicians.length }}</strong></div>
+                <div><span>Patients</span><strong>{{ repProfileSummary.patients.length }}</strong></div>
+                <div><span>Orders</span><strong>{{ repProfileSummary.orders.length }}</strong></div>
+                <div><span>Revenue</span><strong>{{ repProfileSummary.revenue | currency:'USD':'symbol':'1.0-0' }}</strong></div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- <div class="sales-team-profile-tabs mb-4">
+          <button class="btn" [class.active]="profileTab === 'overview'" (click)="profileTab = 'overview'">Overview</button>
+          <button class="btn" [class.active]="profileTab === 'territories'" (click)="profileTab = 'territories'">Territories</button>
+          <button class="btn" [class.active]="profileTab === 'physicians'" (click)="profileTab = 'physicians'">Physicians</button>
+          <button class="btn" [class.active]="profileTab === 'patients'" (click)="profileTab = 'patients'">Patients</button>
+          <button class="btn" [class.active]="profileTab === 'orders'" (click)="profileTab = 'orders'">Orders</button>
+          <button class="btn" [class.active]="profileTab === 'performance'" (click)="profileTab = 'performance'">Performance</button>
+        </div> -->
+
+        <!-- <div *ngIf="profileTab === 'overview'" class="sales-team-detail-grid">
+          <div class="sales-team-detail-card">
+            <span>Territory</span>
+            <strong>{{ repProfileSummary.territory }}</strong>
+          </div>
+          <div class="sales-team-detail-card">
+            <span>Achievement</span>
+            <strong>{{ repProfileSummary.achievementPct }}%</strong>
+          </div>
+          <div class="sales-team-detail-card">
+            <span>Product</span>
+            <strong>{{ repProfileSummary.rep.product }}</strong>
+          </div>
+        </div> -->
+
+        <div *ngIf="profileTab === 'territories'" class="alert alert-light border mb-0">
+          Territory ownership is currently modeled as one primary area: <strong>{{ repProfileSummary.territory }}</strong>.
+        </div>
+
+        <div *ngIf="profileTab === 'physicians'" class="ib-section-card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+                <thead class="ib-table-header">
+                  <tr>
+                    <th class="py-2 px-3">Physician</th>
+                    <th class="py-2">State</th>
+                    <th class="py-2">Product</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let doc of repProfileSummary.physicians">
+                    <td class="px-3 ">{{ doc.firstName }} {{ doc.lastName }}</td>
+                    <td class="text-muted">{{ doc.state }}</td>
+                    <td>{{ doc.product }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="profileTab === 'patients'" class="ib-section-card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+                <thead class="ib-table-header">
+                  <tr>
+                    <th class="py-2 px-3">Patient</th>
+                    <th class="py-2">Enrollment Status</th>
+                    <th class="py-2">State</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let patient of repProfileSummary.patients">
+                    <td class="px-3 ">{{ patient.name }}</td>
+                    <td>{{ patient.enrollmentStatus || patient.status }}</td>
+                    <td class="text-muted">{{ patient.physicianState }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="profileTab === 'orders'" class="ib-section-card">
+          <div class="card-body p-0">
+            <div class="table-responsive">
+              <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+                <thead class="ib-table-header">
+                  <tr>
+                    <th class="py-2 px-3">Order</th>
+                    <th class="py-2">Facility</th>
+                    <th class="py-2">Status</th>
+                    <th class="py-2 text-end">Units</th>
+                    <th class="py-2 text-end">Revenue</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr *ngFor="let order of repProfileSummary.orders">
+                    <td class="px-3 ">{{ order.id }}</td>
+                    <td>{{ order.facility }}</td>
+                    <td>{{ order.status }}</td>
+                    <td class="text-end">{{ order.units }}</td>
+                    <td class="text-end">{{ order.total | currency:'USD':'symbol':'1.0-0' }}</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <div *ngIf="profileTab === 'performance'" class="sales-team-detail-grid">
+          <div class="sales-team-detail-card">
+            <span>Revenue</span>
+            <strong>{{ repProfileSummary.revenue | currency:'USD':'symbol':'1.0-0' }}</strong>
+          </div>
+          <div class="sales-team-detail-card">
+            <span>Orders</span>
+            <strong>{{ repProfileSummary.orders.length }}</strong>
+          </div>
+          <div class="sales-team-detail-card">
+            <span>Achievement</span>
+            <strong>{{ repProfileSummary.achievementPct }}%</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+  <div *ngIf="activeTab === 'create-rep'">
+    <div class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">{{ editingName ? 'Edit Representative' : 'Create Representative' }}</h5>
+          <!-- <p class="ib-section-card__meta">Add or update a representative profile used across territories, coverage, and performance.</p> -->
+        </div>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="saveRep()" #repFormRef="ngForm">
+          <div class="ib-form-section mb-4">
+            <p class="ib-form-section__title">Representative Details</p>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">Full Name</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="repForm.name" name="name" required [disabled]="!!editingName">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">Position / Location</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="repForm.position" name="position" required placeholder="e.g. Boston, MA">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Area ID</label>
+                <input type="text" class="form-control bg-light fw-bold" [(ngModel)]="repForm.areaId" name="areaId" required placeholder="e.g. EA101">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Area / Territory</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="repForm.area" name="area" required placeholder="e.g. East">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Product</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="repForm.product" name="product" required>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label fw-bold small text-muted">All Team</label>
+                <select class="form-select bg-light" [(ngModel)]="repForm.allTeamMark" name="allTeamMark">
+                  <option value="Y">Y</option><option value="N">N</option>
+                </select>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label fw-bold small text-muted">GLB-NCL</label>
+                <select class="form-select bg-light" [(ngModel)]="repForm.glbNcl" name="glbNcl">
+                  <option value="Y">Y</option><option value="N">N</option>
+                </select>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label fw-bold small text-muted">Leadership</label>
+                <select class="form-select bg-light" [(ngModel)]="repForm.leadershipTeam" name="leadershipTeam">
+                  <option value="Y">Y</option><option value="N">N</option>
+                </select>
+              </div>
+              <div class="col-6 col-md-3">
+                <label class="form-label fw-bold small text-muted">ARI Team</label>
+                <select class="form-select bg-light" [(ngModel)]="repForm.ariTeam" name="ariTeam">
+                  <option value="Y">Y</option><option value="N">N</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 border-top pt-3">
+            <button type="button" class="btn ib-btn-secondary" (click)="setTab('representatives', selectedRep?.name)">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="!repFormRef.valid">
+              {{ editingName ? 'Update Rep' : 'Save Rep' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'performance'">
+    <div class="sales-team-kpi-grid mb-4">
+      <div class="card border-0 shadow-sm sales-team-kpi-card sales-team-kpi-card--accent"><div class="card-body"><p class="sales-team-kpi-card__label">Monthly Target</p><h4 class="sales-team-kpi-card__value">{{ performanceKpis.monthlyTarget }}</h4></div></div>
+      <div class="card border-0 shadow-sm sales-team-kpi-card"><div class="card-body"><p class="sales-team-kpi-card__label">Revenue Achieved</p><h4 class="sales-team-kpi-card__value sales-team-kpi-card__value--small">{{ performanceKpis.revenueAchieved | currency:'USD':'symbol':'1.0-0' }}</h4></div></div>
+      <div class="card border-0 shadow-sm sales-team-kpi-card"><div class="card-body"><p class="sales-team-kpi-card__label">Units Sold</p><h4 class="sales-team-kpi-card__value">{{ performanceKpis.unitsSold }}</h4></div></div>
+      <div class="card border-0 shadow-sm sales-team-kpi-card"><div class="card-body"><p class="sales-team-kpi-card__label">Achievement %</p><h4 class="sales-team-kpi-card__value">{{ performanceKpis.achievementPct }}%</h4></div></div>
+    </div>
+
+    <div class="ib-filter-card mb-4">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-bold small text-muted">Rep</label>
+          <select class="form-select bg-light" [(ngModel)]="performanceFilters.rep" name="perfRep" (ngModelChange)="refreshPerformanceCharts()">
+            <option *ngFor="let option of repOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small text-muted">Territory</label>
+          <select class="form-select bg-light" [(ngModel)]="performanceFilters.territory" name="perfTerritory" (ngModelChange)="refreshPerformanceCharts()">
+            <option *ngFor="let option of territoryOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small text-muted">Period</label>
+          <select class="form-select bg-light" [(ngModel)]="performanceFilters.period" name="perfPeriod" (ngModelChange)="refreshPerformanceCharts()">
+            <option value="q2">Q2 2026</option>
+            <option value="ytd">YTD</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="ib-section-card mb-4">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Target vs Achieved</h5>
+          <!-- <p class="ib-section-card__meta">Targets, achievements, and top performers by rep and territory.</p> -->
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="sales-team-chart" #targetChartEl></div>
+      </div>
+    </div>
+
+    <div class="row g-4">
+      <div class="col-lg-6">
+        <div class="ib-section-card h-100">
+          <div class="ib-section-card__header">
+            <div>
+              <h5 class="ib-section-card__title">Top Performers</h5>
+              <p class="ib-section-card__meta">Achievement % leaderboard.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="sales-team-chart sales-team-chart--small" #topPerformersChartEl></div>
+          </div>
+        </div>
+      </div>
+      <div class="col-lg-6">
+        <div class="ib-section-card h-100">
+          <div class="ib-section-card__header">
+            <div>
+              <h5 class="ib-section-card__title">Monthly Growth</h5>
+              <p class="ib-section-card__meta">Dummy growth trend for the current period.</p>
+            </div>
+          </div>
+          <div class="card-body">
+            <div class="sales-team-chart sales-team-chart--small" #growthChartEl></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'activities'">
+    <div class="ib-filter-card mb-4">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-3">
+          <label class="form-label fw-bold small text-muted">Rep</label>
+          <select class="form-select bg-light" [(ngModel)]="activityFilters.rep" name="actRep">
+            <option *ngFor="let option of repOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold small text-muted">Activity Type</label>
+          <select class="form-select bg-light" [(ngModel)]="activityFilters.activityType" name="actType">
+            <option *ngFor="let option of activityTypeOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold small text-muted">Physician</label>
+          <select class="form-select bg-light" [(ngModel)]="activityFilters.physician" name="actPhysician">
+            <option *ngFor="let option of activityPhysicianOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold small text-muted">From</label>
+          <input type="date" class="form-control bg-light" [(ngModel)]="activityFilters.startDate" name="actStart">
+        </div>
+        <div class="col-md-3">
+          <label class="form-label fw-bold small text-muted">To</label>
+          <input type="date" class="form-control bg-light" [(ngModel)]="activityFilters.endDate" name="actEnd">
+        </div>
+      </div>
+    </div>
+
+    <div class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Activities</h5>
+          <!-- <p class="ib-section-card__meta">Operational logging for field work: visits, follow-ups, product discussions, enrollment support, and order follow-ups.</p> -->
+        </div>
+        <span class="ib-table-toolbar__meta">{{ filteredActivities.length }} activities</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+            <thead class="ib-table-header">
+              <tr>
+                <th class="py-2 px-3">Rep Name</th>
+                <th class="py-2">Activity Type</th>
+                <th class="py-2">Physician</th>
+                <th class="py-2">Date</th>
+                <th class="py-2">Notes</th>
+                <th class="py-2">Next Follow-up</th>
+                <th class="py-2 px-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let a of filteredActivities">
+                <td class="px-3 ">{{ a.repName }}</td>
+                <td><span class="ib-chip">{{ a.activityType }}</span></td>
+                <td>{{ a.physician }}</td>
+                <td class="text-muted">{{ a.date }}</td>
+                <td class="text-muted">{{ a.notes }}</td>
+                <td>{{ a.nextFollowUp }}</td>
+                <td class="px-3 text-end">
+                  <div class="sales-team-action-group justify-content-end">
+                    <!-- <button class="ib-icon-btn" type="button" title="View" aria-label="View"><i class="bi bi-eye"></i></button> -->
+                    <button class="ib-icon-btn" type="button" title="Edit" aria-label="Edit"><i class="bi bi-pencil"></i></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,713 @@
+<div class="container-fluid position-relative">
+  <div class="ib-page-header">
+    <div>
+      <h2 class="ib-page-header__title">Physician Management</h2>
+    </div>
+    <div class="ib-page-header__actions">
+      <!-- <button class="btn ib-btn-secondary" *ngIf="activeTab !== 'directory'" (click)="setTab('directory', selectedPhysician?.npi)">
+        <i class="bi bi-list-ul"></i> Directory
+      </button> -->
+      <!-- <button class="btn btn-primary" (click)="startAddPhysician()">
+        <i class="bi bi-plus-lg"></i> {{ activeTab === 'add-physician' ? 'Add Another Physician' : 'Add Physician' }}
+      </button> -->
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'directory'">
+    <div class="provider-kpi-grid mb-4">
+      <div class="card border-0 shadow-sm provider-kpi-card provider-kpi-card--accent"><div class="card-body"><p class="provider-kpi-card__label">Total Physicians</p><h4 class="provider-kpi-card__value">{{ directoryKpis.totalPhysicians }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Active</p><h4 class="provider-kpi-card__value">{{ directoryKpis.activePhysicians }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Linked Patients</p><h4 class="provider-kpi-card__value">{{ directoryKpis.totalPatients }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Linked Orders</p><h4 class="provider-kpi-card__value">{{ directoryKpis.totalOrders }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Revenue Generated</p><h4 class="provider-kpi-card__value provider-kpi-card__value--small">{{ directoryKpis.totalRevenue | currency:'USD':'symbol':'1.0-0' }}</h4></div></div>
+    </div>
+
+    <div class="ib-filter-card ib-filter-card--compact mb-4">
+      <div class="row g-2 align-items-end">
+        <div class="col-lg-4">
+          <label class="form-label ib-compact-filter__label small text-muted">Search by Name</label>
+          <input class="form-control form-control-sm bg-light ib-compact-filter__control" [(ngModel)]="directoryFilters.search" name="physicianSearch" placeholder="Physician name" />
+        </div>
+        <div class="col-lg-2">
+          <label class="form-label ib-compact-filter__label small text-muted">NPI</label>
+          <input class="form-control form-control-sm bg-light ib-compact-filter__control" [(ngModel)]="directoryFilters.npi" name="physicianNpiSearch" placeholder="NPI number" />
+        </div>
+        <div class="col-lg-2">
+          <label class="form-label ib-compact-filter__label small text-muted">DEA</label>
+          <input class="form-control form-control-sm bg-light ib-compact-filter__control" [(ngModel)]="directoryFilters.deaNumber" name="physicianDeaSearch" placeholder="DEA number" />
+        </div>
+        <div class="col-lg-2">
+          <label class="form-label ib-compact-filter__label small text-muted">State</label>
+          <select class="form-select form-select-sm bg-light ib-compact-filter__control" [(ngModel)]="directoryFilters.state" name="physicianStateFilter">
+            <option value="All">All</option>
+            <option *ngFor="let physician of physicians" [ngValue]="physician.state">{{ physician.state }}</option>
+          </select>
+        </div>
+        <div class="col-lg-2">
+          <label class="form-label ib-compact-filter__label small text-muted">Territory</label>
+          <select class="form-select form-select-sm bg-light ib-compact-filter__control" [(ngModel)]="directoryFilters.territory" name="physicianTerritoryFilter">
+            <option *ngFor="let option of territoryOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-lg-2">
+          <label class="form-label ib-compact-filter__label small text-muted">Sales Rep</label>
+          <select class="form-select form-select-sm bg-light ib-compact-filter__control" [(ngModel)]="directoryFilters.salesRep" name="physicianSalesRepFilter">
+            <option *ngFor="let option of salesRepOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-lg-2">
+          <label class="form-label ib-compact-filter__label small text-muted">Product</label>
+          <select class="form-select form-select-sm bg-light ib-compact-filter__control" [(ngModel)]="directoryFilters.product" name="physicianProductFilter">
+            <option *ngFor="let option of productOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-lg-2">
+          <label class="form-label ib-compact-filter__label small text-muted">Status</label>
+          <select class="form-select form-select-sm bg-light ib-compact-filter__control" [(ngModel)]="directoryFilters.status" name="physicianStatusFilter">
+            <option *ngFor="let option of statusOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Physician Directory</h5>
+          <!-- <p class="ib-section-card__meta">Search doctors, understand ownership, and open profile-based physician workflows.</p> -->
+        </div>
+        <span class="ib-table-toolbar__meta">{{ filteredPhysicians.length }} physicians</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+            <thead class="ib-table-header">
+              <tr>
+                <th class="py-2 px-3">Physician ID</th>
+                <th class="py-2">Physician Name</th>
+                <th class="py-2">Specialty</th>
+                <th class="py-2">NPI</th>
+                <th class="py-2">Territory</th>
+                <th class="py-2">Sales Rep</th>
+                <th class="py-2 text-center">Total Patients</th>
+                <th class="py-2 text-center">Total Orders</th>
+                <th class="py-2 text-end">Revenue Generated</th>
+                <th class="py-2">Last Activity</th>
+                <th class="py-2 px-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let physician of filteredPhysicians">
+                <td class="px-3 "><span class="ib-chip">PHY-{{ physician.npi.slice(-4) }}</span></td>
+                <td>
+                  <div class="d-flex flex-column">
+                    <span >{{ physician.firstName }} {{ physician.lastName }}</span>
+                    <small class="text-muted">{{ physician.clinicName || physician.hospitalAffiliation || physician.city }}</small>
+                  </div>
+                </td>
+                <td>{{ physician.specialty || 'Urology' }}</td>
+                <td><span class="ib-chip">{{ physician.npi }}</span></td>
+                <td>{{ physician.territory || physician.state }}</td>
+                <td>{{ physician.salesRep || 'Unassigned' }}</td>
+                <td class="text-center">{{ getLinkedPatients(physician).length }}</td>
+                <td class="text-center">{{ getLinkedOrders(physician).length }}</td>
+                <td class="text-end text-success">{{ getPhysicianRevenue(physician) | currency:'USD':'symbol':'1.0-0' }}</td>
+                <td>{{ getLastActivity(physician) }}</td>
+                <td class="px-3 text-end">
+                  <div class="provider-action-group justify-content-end">
+                    <button class="ib-icon-btn" type="button" title="View Profile" aria-label="View Profile" (click)="openPhysicianProfile(physician.npi)">
+                      <i class="bi bi-person-vcard"></i>
+                    </button>
+                    <button class="ib-icon-btn" type="button" title="Edit Physician" aria-label="Edit Physician" (click)="editPhysician(physician)">
+                      <i class="bi bi-pencil"></i>
+                    </button>
+                    <button class="ib-icon-btn" type="button" title="Add Patient" aria-label="Add Patient" (click)="openPhysicianProfile(physician.npi, 'patients')">
+                      <i class="bi bi-person-plus"></i>
+                    </button>
+                    <!-- <button class="ib-icon-btn" type="button" title="Create Order" aria-label="Create Order" (click)="openPhysicianOrders(physician.npi)">
+                      <i class="bi bi-cart-plus"></i>
+                    </button> -->
+                    <!-- <button class="ib-icon-btn" type="button" title="View Timeline" aria-label="View Timeline" (click)="openTimeline(physician.npi)">
+                      <i class="bi bi-clock-history"></i>
+                    </button> -->
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'add-physician'">
+    <div class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">{{ editingNpi ? 'Edit Physician' : 'Add Physician' }}</h5>
+          <p class="ib-section-card__meta">Capture basic, professional, contact, address, and business mapping details in a cleaner physician intake flow.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <form (ngSubmit)="savePhysician()" #physicianFormRef="ngForm">
+          <div class="ib-form-section mb-4">
+            <p class="ib-form-section__title">Step 1 - Basic Details</p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">First Name</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.firstName" name="firstName" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Middle Name</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.middleName" name="middleName">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Last Name</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.lastName" name="lastName" required>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Gender</label>
+                <select class="form-select bg-light" [(ngModel)]="physicianForm.gender" name="gender">
+                  <option value="Male">Male</option>
+                  <option value="Female">Female</option>
+                  <option value="Other">Other</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Specialty</label>
+                <select class="form-select bg-light" [(ngModel)]="physicianForm.specialty" name="specialty">
+                  <option *ngFor="let specialty of specialtyOptions" [ngValue]="specialty">{{ specialty }}</option>
+                </select>
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Status</label>
+                <select class="form-select bg-light" [(ngModel)]="physicianForm.status" name="status">
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="ib-form-section mb-4">
+            <p class="ib-form-section__title">Step 2 - Professional Details</p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">NPI Number</label>
+                <input type="text" class="form-control bg-light fw-bold" [(ngModel)]="physicianForm.npi" name="npi" required [disabled]="!!editingNpi">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">DEA Number</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.deaNumber" name="deaNumber">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">License Number</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.licenseNumber" name="licenseNumber">
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold small text-muted">Hospital Affiliation</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.hospitalAffiliation" name="hospitalAffiliation">
+              </div>
+            </div>
+          </div>
+
+          <div class="ib-form-section mb-4">
+            <p class="ib-form-section__title">Step 3 - Contact & Address</p>
+            <div class="row g-3">
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Email</label>
+                <input type="email" class="form-control bg-light" [(ngModel)]="physicianForm.email" name="email">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Phone</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.phone" name="phone">
+              </div>
+              <div class="col-md-4">
+                <label class="form-label fw-bold small text-muted">Fax</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.fax" name="fax">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">Clinic Name</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.clinicName" name="clinicName">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">Address Line 1</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.address" name="address">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">Address Line 2</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.addressLine2" name="addressLine2">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">City</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.city" name="city">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">State</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.state" name="state">
+              </div>
+              <div class="col-md-2">
+                <label class="form-label fw-bold small text-muted">ZIP</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.zip" name="zip">
+              </div>
+            </div>
+          </div>
+
+          <div class="ib-form-section mb-4">
+            <p class="ib-form-section__title">Step 4 - Business Mapping</p>
+            <div class="row g-3">
+              <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Territory</label>
+                <select class="form-select bg-light" [(ngModel)]="physicianForm.territory" name="territory">
+                  <option *ngFor="let option of territoryOptions.slice(1)" [ngValue]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Assigned Sales Rep</label>
+                <select class="form-select bg-light" [(ngModel)]="physicianForm.salesRep" name="salesRep">
+                  <option *ngFor="let option of salesRepOptions.slice(1)" [ngValue]="option">{{ option }}</option>
+                </select>
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Distributor</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.distributor" name="distributor">
+              </div>
+              <div class="col-md-3">
+                <label class="form-label fw-bold small text-muted">Products Covered</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="physicianForm.product" name="product" required>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold small text-muted">Notes</label>
+                <textarea rows="4" class="form-control bg-light" [(ngModel)]="physicianForm.notes" name="notes" placeholder="Sales notes, distributor context, or next follow-up details"></textarea>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 border-top pt-3">
+            <button type="button" class="btn ib-btn-secondary" (click)="setTab('directory', selectedPhysician?.npi)">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="!physicianFormRef.valid">
+              {{ editingNpi ? 'Update Physician' : 'Save Physician' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'profile' && profileSummary">
+    <div class="card border-0 shadow-sm provider-profile-summary mb-4">
+      <div class="card-body">
+        <div class="d-flex flex-wrap justify-content-between gap-3">
+          <div>
+            <p class="provider-profile-summary__eyebrow">Physician 360</p>
+            <h3 class="provider-profile-summary__title mb-1">{{ profileSummary.physician.firstName }} {{ profileSummary.physician.lastName }}</h3>
+            <p class="text-muted mb-2">{{ profileSummary.physician.specialty || 'Urology' }} | {{ profileSummary.territory }} | {{ profileSummary.salesRep }}</p>
+            <div class="d-flex flex-wrap gap-2">
+              <span class="ib-status-badge" [ngClass]="getStatusBadgeClass(profileSummary.physician.status || 'Active')">{{ profileSummary.physician.status || 'Active' }}</span>
+              <span class="ib-chip">{{ profileSummary.physician.product }}</span>
+            </div>
+          </div>
+          <div class="provider-action-group">
+            <button class="ib-icon-btn" type="button" title="Edit Physician" aria-label="Edit Physician" (click)="editPhysician(profileSummary.physician)">
+              <i class="bi bi-pencil"></i>
+            </button>
+            <button class="ib-icon-btn" type="button" title="Add Patient" aria-label="Add Patient" (click)="openPhysicianProfile(profileSummary.physician.npi, 'patients')">
+              <i class="bi bi-person-plus"></i>
+            </button>
+            <button class="ib-icon-btn" type="button" title="Add Order" aria-label="Add Order" (click)="openPhysicianOrders(profileSummary.physician.npi)">
+              <i class="bi bi-cart-plus"></i>
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div class="provider-kpi-grid mb-4">
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Total Patients</p><h4 class="provider-kpi-card__value">{{ profileSummary.totalPatients }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Total Orders</p><h4 class="provider-kpi-card__value">{{ profileSummary.totalOrders }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Total Revenue</p><h4 class="provider-kpi-card__value provider-kpi-card__value--small">{{ profileSummary.totalRevenue | currency:'USD':'symbol':'1.0-0' }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Pending Enrollments</p><h4 class="provider-kpi-card__value">{{ profileSummary.pendingEnrollments }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Active Patients</p><h4 class="provider-kpi-card__value">{{ profileSummary.activePatients }}</h4></div></div>
+    </div>
+
+    <div class="provider-profile-tabs mb-4">
+      <button class="btn" [class.active]="profileTab === 'overview'" (click)="profileTab = 'overview'">Overview</button>
+      <button class="btn" [class.active]="profileTab === 'patients'" (click)="profileTab = 'patients'">Patients</button>
+      <button class="btn" [class.active]="profileTab === 'orders'" (click)="profileTab = 'orders'">Orders</button>
+      <button class="btn" [class.active]="profileTab === 'performance'" (click)="profileTab = 'performance'">Performance</button>
+      <button class="btn" [class.active]="profileTab === 'notes'" (click)="profileTab = 'notes'">Notes</button>
+    </div>
+
+    <div *ngIf="profileTab === 'overview'" class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Overview</h5>
+          <p class="ib-section-card__meta">Professional details, contact information, and business mappings.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="row g-4">
+          <div class="col-lg-6">
+            <div class="provider-detail-list">
+              <div><span>NPI</span><strong>{{ profileSummary.physician.npi }}</strong></div>
+              <div><span>DEA / License</span><strong>{{ profileSummary.physician.deaNumber || '--' }} / {{ profileSummary.physician.licenseNumber || '--' }}</strong></div>
+              <div><span>Hospital Affiliation</span><strong>{{ profileSummary.physician.hospitalAffiliation || profileSummary.physician.clinicName || '--' }}</strong></div>
+              <div><span>Contact</span><strong>{{ profileSummary.physician.email || '--' }} | {{ profileSummary.physician.phone || '--' }}</strong></div>
+            </div>
+          </div>
+          <div class="col-lg-6">
+            <div class="provider-detail-list">
+              <div><span>Territory</span><strong>{{ profileSummary.territory }}</strong></div>
+              <div><span>Sales Rep</span><strong>{{ profileSummary.salesRep }}</strong></div>
+              <div><span>Distributor</span><strong>{{ profileSummary.physician.distributor || profileSummary.physician.pharmacy }}</strong></div>
+              <div><span>Address</span><strong>{{ profileSummary.physician.address }}, {{ profileSummary.physician.city }}, {{ profileSummary.physician.state }} {{ profileSummary.physician.zip }}</strong></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="profileTab === 'patients'" class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Patients</h5>
+          <p class="ib-section-card__meta">Patients linked to this physician for enrollment and commercial activity.</p>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+            <thead class="ib-table-header">
+              <tr>
+                <th class="py-2 px-3">Patient Name</th>
+                <th class="py-2">Enrollment Status</th>
+                <th class="py-2">Product</th>
+                <th class="py-2">Last Order</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let patient of selectedPhysicianPatients">
+                <td class="px-3 fw-bold">{{ patient.name }}</td>
+                <td><span class="ib-status-badge" [ngClass]="getStatusBadgeClass(patient.enrollmentStatus || patient.status)">{{ patient.enrollmentStatus || patient.status }}</span></td>
+                <td>{{ patient.product }}</td>
+                <td>{{ patient.shipDate || '-' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="profileTab === 'orders'" class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Orders</h5>
+          <p class="ib-section-card__meta">Physician-linked orders and transaction history.</p>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+            <thead class="ib-table-header">
+              <tr>
+                <th class="py-2 px-3">Order Number</th>
+                <th class="py-2">Product</th>
+                <th class="py-2 text-end">Quantity</th>
+                <th class="py-2">Status</th>
+                <th class="py-2 text-end">Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of selectedPhysicianOrders">
+                <td class="px-3 fw-bold">{{ order.id }}</td>
+                <td>{{ order.product }}</td>
+                <td class="text-end">{{ order.units }}</td>
+                <td><span class="ib-status-badge" [ngClass]="getStatusBadgeClass(order.status)">{{ order.status }}</span></td>
+                <td class="text-end">{{ order.total | currency:'USD':'symbol':'1.0-0' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="profileTab === 'performance'" class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Performance</h5>
+          <p class="ib-section-card__meta">Orders, revenue, and patient growth indicators for this physician.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="provider-performance-grid">
+          <div class="provider-performance-card">
+            <span>Orders over time</span>
+            <strong>{{ profileSummary.totalOrders }} orders this month</strong>
+          </div>
+          <div class="provider-performance-card">
+            <span>Revenue trend</span>
+            <strong>{{ profileSummary.totalRevenue | currency:'USD':'symbol':'1.0-0' }} recognized</strong>
+          </div>
+          <div class="provider-performance-card">
+            <span>Patient growth</span>
+            <strong>{{ profileSummary.totalPatients }} linked patients</strong>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <div *ngIf="profileTab === 'notes'" class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Notes</h5>
+          <p class="ib-section-card__meta">Sales team notes and physician relationship context.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="alert alert-light border mb-0">
+          {{ profileSummary.physician.notes || 'Doctor interested in product education. Follow-up next week.' }}
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'orders' && selectedPhysician">
+    <div class="provider-kpi-grid mb-4">
+      <div class="card border-0 shadow-sm provider-kpi-card provider-kpi-card--accent"><div class="card-body"><p class="provider-kpi-card__label">Total Orders</p><h4 class="provider-kpi-card__value">{{ physicianOrderKpis.totalOrders }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Pending Orders</p><h4 class="provider-kpi-card__value">{{ physicianOrderKpis.pendingOrders }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Completed Orders</p><h4 class="provider-kpi-card__value">{{ physicianOrderKpis.completedOrders }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Revenue</p><h4 class="provider-kpi-card__value provider-kpi-card__value--small">{{ physicianOrderKpis.revenue | currency:'USD':'symbol':'1.0-0' }}</h4></div></div>
+    </div>
+
+    <div class="ib-filter-card mb-4">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-bold small text-muted">Date Range From</label>
+          <input type="date" class="form-control bg-light" [(ngModel)]="ordersFilters.startDate" name="ordersStartDate">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small text-muted">Date Range To</label>
+          <input type="date" class="form-control bg-light" [(ngModel)]="ordersFilters.endDate" name="ordersEndDate">
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold small text-muted">Product</label>
+          <select class="form-select bg-light" [(ngModel)]="ordersFilters.product" name="ordersProductFilter">
+            <option *ngFor="let option of productOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-md-2">
+          <label class="form-label fw-bold small text-muted">Order Status</label>
+          <select class="form-select bg-light" [(ngModel)]="ordersFilters.status" name="ordersStatusFilter">
+            <option value="All">All</option>
+            <option value="Pending">Pending</option>
+            <option value="Credit Hold">Credit Hold</option>
+            <option value="Shipped">Shipped</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Prescriptions / Orders</h5>
+          <p class="ib-section-card__meta">Track physician-driven orders, shipments, invoices, and revenue contribution.</p>
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+            <thead class="ib-table-header">
+              <tr>
+                <th class="py-2 px-3">Order ID</th>
+                <th class="py-2">Patient</th>
+                <th class="py-2">Product</th>
+                <th class="py-2 text-end">Quantity</th>
+                <th class="py-2">Shipment Status</th>
+                <th class="py-2">Invoice Status</th>
+                <th class="py-2 text-end">Revenue</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let order of selectedPhysicianOrders">
+                <td class="px-3 fw-bold">{{ order.id }}</td>
+                <td>{{ selectedPhysicianPatients[0]?.name || 'Linked patient' }}</td>
+                <td>{{ order.product }}</td>
+                <td class="text-end">{{ order.units }}</td>
+                <td><span class="ib-status-badge" [ngClass]="getStatusBadgeClass(order.status)">{{ order.status }}</span></td>
+                <td>{{ order.invoiceNo ? 'Invoiced' : 'Pending Invoice' }}</td>
+                <td class="text-end">{{ order.total | currency:'USD':'symbol':'1.0-0' }}</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'territory-mapping'">
+    <div class="provider-kpi-grid mb-4">
+      <div class="card border-0 shadow-sm provider-kpi-card provider-kpi-card--accent"><div class="card-body"><p class="provider-kpi-card__label">Total Mappings</p><h4 class="provider-kpi-card__value">{{ mappingKpis.totalMappings }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">East Coverage</p><h4 class="provider-kpi-card__value">{{ mappingKpis.eastCoverage }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Remapped This Month</p><h4 class="provider-kpi-card__value">{{ mappingKpis.remappedThisMonth }}</h4></div></div>
+      <div class="card border-0 shadow-sm provider-kpi-card"><div class="card-body"><p class="provider-kpi-card__label">Unique Reps</p><h4 class="provider-kpi-card__value">{{ mappingKpis.uniqueReps }}</h4></div></div>
+    </div>
+
+    <div class="ib-section-card mb-4" *ngIf="selectedPhysician">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Territory Card</h5>
+          <!-- <p class="ib-section-card__meta">Current territory ownership and regional alignment for the selected physician.</p> -->
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="provider-mapping-summary">
+          <div><span>Territory Name</span><strong>{{ getTerritory(selectedPhysician) }}</strong></div>
+          <div><span>Sales Rep</span><strong>{{ getSalesRep(selectedPhysician) }}</strong></div>
+          <div><span>Region</span><strong>{{ selectedPhysician.state }}</strong></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Territory Mapping</h5>
+          <!-- <p class="ib-section-card__meta">Reassignment-ready view of physician territory, rep, product focus, and last visit.</p> -->
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+            <thead class="ib-table-header">
+              <tr>
+                <th class="py-2 px-3">Physician Name</th>
+                <th class="py-2">Territory</th>
+                <th class="py-2">Sales Rep</th>
+                <th class="py-2">Product Focus</th>
+                <th class="py-2">Last Visit</th>
+                <th class="py-2 px-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of territoryMappingRows">
+                <td class="px-3 fw-bold">{{ row.physician.firstName }} {{ row.physician.lastName }}</td>
+                <td>{{ row.territory }}</td>
+                <td>{{ row.salesRep }}</td>
+                <td>{{ row.productFocus }}</td>
+                <td>{{ row.lastVisit }}</td>
+                <td class="px-3 text-end">
+                  <div class="provider-action-group justify-content-end">
+                    <button
+                      class="ib-icon-btn"
+                      type="button"
+                      title="Change Territory"
+                      aria-label="Change Territory"
+                      (click)="openMappingModal(row.physician.npi, 'territory')">
+                      <i class="bi bi-diagram-3"></i>
+                    </button>
+                    <button
+                      class="ib-icon-btn"
+                      type="button"
+                      title="Change Sales Rep"
+                      aria-label="Change Sales Rep"
+                      (click)="openMappingModal(row.physician.npi, 'salesRep')">
+                      <i class="bi bi-person-gear"></i>
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showMappingModal && mappingModalPhysician" class="ib-modal-overlay">
+    <div class="ib-modal-shell" style="max-width: 560px;">
+      <div class="ib-modal-header">
+        <h5 class="ib-modal-title">{{ mappingModalTitle }}</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeMappingModal()"></button>
+      </div>
+      <div class="ib-modal-body">
+        <div class="ib-form-section mb-4">
+          <p class="ib-form-section__title">Physician</p>
+          <p class="mb-2"><strong>{{ mappingModalPhysician.firstName }} {{ mappingModalPhysician.lastName }}</strong></p>
+          <p class="mb-0 text-muted">NPI: {{ mappingModalPhysician.npi }}</p>
+        </div>
+
+        <div class="ib-form-section mb-4">
+          <p class="ib-form-section__title">Current Mapping</p>
+          <p class="mb-0"><strong>{{ mappingModalFieldLabel }}:</strong> {{ mappingCurrentValue }}</p>
+        </div>
+
+        <div class="ib-form-section mb-4">
+          <label class="form-label fw-bold small text-muted">Select New {{ mappingModalFieldLabel }}</label>
+          <select class="form-select bg-light" [(ngModel)]="mappingSelection" name="mappingSelection">
+            <option *ngFor="let option of mappingModalOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+          <button type="button" class="btn ib-btn-secondary" (click)="closeMappingModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" [disabled]="!mappingSelection || mappingSelection === mappingCurrentValue" (click)="saveMappingChange()">
+            Save Change
+          </button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- <div *ngIf="activeTab === 'timeline' && selectedPhysician">
+    <div class="ib-filter-card mb-4">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-bold small text-muted">Date</label>
+          <input type="date" class="form-control bg-light" [(ngModel)]="timelineFilters.startDate" name="timelineStartDate">
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small text-muted">Event Type</label>
+          <select class="form-select bg-light" [(ngModel)]="timelineFilters.eventType" name="timelineEventType">
+            <option value="All Events">All Events</option>
+            <option value="Patients">Patients</option>
+            <option value="Orders">Orders</option>
+            <option value="Sales Visits">Sales Visits</option>
+            <option value="Mapping">Mapping</option>
+            <option value="Notes">Notes</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small text-muted">Sales Rep</label>
+          <select class="form-select bg-light" [(ngModel)]="timelineFilters.salesRep" name="timelineSalesRep">
+            <option *ngFor="let option of salesRepOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Activity Timeline</h5>
+          <p class="ib-section-card__meta">Audit trail for physician creation, patient enrollments, orders, visits, mapping changes, and notes.</p>
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="provider-timeline">
+          <div *ngFor="let event of selectedPhysicianTimeline" class="provider-timeline__item">
+            <div class="provider-timeline__marker"></div>
+            <div class="provider-timeline__content">
+              <div class="d-flex justify-content-between flex-wrap gap-2">
+                <strong>{{ event.title }}</strong>
+                <span class="text-muted small">{{ event.date }}</span>
+              </div>
+              <p class="mb-1 text-muted small">{{ event.category }} | {{ event.salesRep }}</p>
+              <p class="mb-0">{{ event.description }}</p>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div> -->
+</div>

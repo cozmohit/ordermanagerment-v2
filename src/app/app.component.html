@@ -1,0 +1,23 @@
+<div class="app-shell container-fluid overflow-hidden p-0">
+  <app-top-nav
+    class="shadow-sm position-relative z-3 flex-shrink-0"
+    [sidebarCollapsed]="isSidebarCollapsed"
+    (toggleSidebar)="toggleSidebar()"></app-top-nav>
+
+  <div class="app-content-row d-flex flex-grow-1 min-h-0">
+    <div
+      class="app-sidebar-column px-0 bg-white z-2 position-relative shadow-sm"
+      [class.app-sidebar-column--collapsed]="isSidebarCollapsed">
+      <app-sidebar
+        [collapsed]="isSidebarCollapsed"
+        (toggleCollapse)="toggleSidebar()"
+        (requestExpand)="expandSidebar()"></app-sidebar>
+    </div>
+
+    <main class="app-main flex-grow-1 overflow-auto p-3 ib-main-surface" style="background: #EBF2FF;">
+      <div class="container-fluid p-0 bg-white py-2 rounded">
+        <router-outlet></router-outlet>
+      </div>
+    </main>
+  </div>
+</div>

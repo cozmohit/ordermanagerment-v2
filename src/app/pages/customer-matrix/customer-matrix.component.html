@@ -1,0 +1,188 @@
+<div class="container-fluid" (click)="closePopover()">
+  <div class="ib-page-header">
+    <h2 class="ib-page-header__title">Customer Matrix</h2>
+  </div>
+
+  <div class="ib-section-card">
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle mb-0 ib-data-table customer-matrix-table">
+          <thead class="ib-table-header">
+            <tr>
+              <th class="py-2 px-3">Name</th>
+              <th class="py-2">Address</th>
+              <th class="py-2">City</th>
+              <th class="py-2">State</th>
+              <th class="py-2">Zip</th>
+              <th class="py-2">Account Type</th>
+              <th class="py-2">BP Numbers (ICS)</th>
+              <th class="py-2">NPI (Accredo)</th>
+              <th class="py-2"></th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let record of records">
+              <td class="px-3 fw-bold"><span class="cm-truncate" title="{{ record.shipToName }}">{{ record.shipToName }}</span></td>
+              <td class="text-muted small"><span class="cm-truncate" title="{{ record.shipToAddress1 }}">{{ record.shipToAddress1 }}</span></td>
+              <td>{{ record.shipToCity }}</td>
+              <td>{{ record.shipToState }}</td>
+              <td class="text-muted small">{{ record.shipToZip }}</td>
+              <td>
+                <span class="ib-status-badge"
+                  [class.ib-status-badge--success]="record.accountType === 'ICS'"
+                  [class.ib-status-badge--info]="record.accountType === 'Accredo'">
+                  {{ record.accountType }}
+                </span>
+              </td>
+
+              <!-- BP Numbers -->
+              <td>
+                <ng-container *ngIf="record.bpNumbersIcs.length; else noBp">
+                  <div class="cm-chip-cell">
+                    <span class="cm-number-chip">{{ record.bpNumbersIcs.slice(0, 2).join(', ') }}</span>
+                    <span *ngIf="record.bpNumbersIcs.length > 2"
+                      class="cm-overflow-badge"
+                      [class.cm-overflow-badge--open]="popover?.record === record && popover?.field === 'bp'"
+                      (click)="openPopover(record, 'bp', $event)">
+                      +{{ record.bpNumbersIcs.length - 2 }}
+                    </span>
+                  </div>
+                  <div class="cm-popover" *ngIf="popover?.record === record && popover?.field === 'bp'" (click)="$event.stopPropagation()">
+                    <div class="cm-popover__title">All BP Numbers</div>
+                    <div class="cm-popover__list">
+                      <span class="cm-number-chip" *ngFor="let bp of record.bpNumbersIcs">{{ bp }}</span>
+                    </div>
+                  </div>
+                </ng-container>
+                <ng-template #noBp><span class="text-muted">—</span></ng-template>
+              </td>
+
+              <!-- NPIs -->
+              <td>
+                <ng-container *ngIf="record.npisAccredo.length; else noNpi">
+                  <div class="cm-chip-cell">
+                    <span class="cm-number-chip cm-number-chip--npi">{{ record.npisAccredo.slice(0, 2).join(', ') }}</span>
+                    <span *ngIf="record.npisAccredo.length > 2"
+                      class="cm-overflow-badge cm-overflow-badge--npi"
+                      [class.cm-overflow-badge--open]="popover?.record === record && popover?.field === 'npi'"
+                      (click)="openPopover(record, 'npi', $event)">
+                      +{{ record.npisAccredo.length - 2 }}
+                    </span>
+                  </div>
+                  <div class="cm-popover cm-popover--npi" *ngIf="popover?.record === record && popover?.field === 'npi'" (click)="$event.stopPropagation()">
+                    <div class="cm-popover__title">All NPIs</div>
+                    <div class="cm-popover__list">
+                      <span class="cm-number-chip cm-number-chip--npi" *ngFor="let npi of record.npisAccredo">{{ npi }}</span>
+                    </div>
+                  </div>
+                </ng-container>
+                <ng-template #noNpi><span class="text-muted">—</span></ng-template>
+              </td>
+
+              <td class="text-end pe-3">
+                <button class="cm-edit-btn" (click)="openEdit(record, $event)">
+                  <i class="bi bi-pencil"></i> Edit
+                </button>
+              </td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ── Edit Modal ──────────────────────────────────────────────── -->
+<div class="ib-modal-overlay" *ngIf="editRecord && editForm" (click)="cancelEdit()">
+  <div class="ib-modal-shell cm-edit-modal" (click)="$event.stopPropagation()">
+
+    <div class="ib-modal-header">
+      <h5 class="ib-modal-title mb-0">Edit Record</h5>
+      <button type="button" class="btn-close" (click)="cancelEdit()"></button>
+    </div>
+
+    <!-- Basic info — grey strip, same as GPO gpo-modal-basic-form -->
+    <div class="cm-modal-basic-form">
+      <div class="row g-2">
+        <div class="col-md-8">
+          <label class="cm-field-label">Ship To Name</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="editForm.shipToName" name="shipToName">
+        </div>
+        <div class="col-md-4">
+          <label class="cm-field-label">Account Type</label>
+          <select class="form-select form-select-sm" [(ngModel)]="editForm.accountType" name="accountType">
+            <option value="ICS">ICS</option>
+            <option value="Accredo">Accredo</option>
+          </select>
+        </div>
+        <div class="col-md-6">
+          <label class="cm-field-label">Ship To Address 1</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="editForm.shipToAddress1" name="shipToAddress1">
+        </div>
+        <div class="col-md-3">
+          <label class="cm-field-label">Ship To City</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="editForm.shipToCity" name="shipToCity">
+        </div>
+        <div class="col-md-1">
+          <label class="cm-field-label">State</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="editForm.shipToState" name="shipToState">
+        </div>
+        <div class="col-md-2">
+          <label class="cm-field-label">Ship To Zip</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="editForm.shipToZip" name="shipToZip">
+        </div>
+      </div>
+    </div>
+
+    <!-- Scrollable body — same pattern as gpo-hierarchy-modal__body -->
+    <div class="cm-edit-modal__body">
+
+      <!-- BP Numbers (ICS) — mirrors gpo-level-edit-row -->
+      <div class="cm-edit-row">
+        <div class="cm-edit-row__info">
+          <span class="cm-edit-row__label">BP Numbers <span class="cm-edit-row__sub">(ICS)</span></span>
+          <span class="cm-edit-row__count">{{ editForm.bpNumbersIcs.length }} assigned</span>
+        </div>
+        <div class="cm-tag-input">
+          <span class="cm-tag" *ngFor="let bp of editForm.bpNumbersIcs; let i = index">
+            {{ bp }}<button type="button" class="cm-tag__remove" (click)="removeBp(i)">×</button>
+          </span>
+          <input class="cm-tag-input__field" [(ngModel)]="bpInput" name="bpInput"
+            placeholder="Type and press Enter to add…"
+            (keydown.enter)="addBp(); $event.preventDefault()">
+          <button type="button" class="cm-tag-input__add" (click)="addBp()" [disabled]="!bpInput.trim()">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
+        <p class="cm-tag-hint" *ngIf="!editForm.bpNumbersIcs.length">No BP numbers assigned yet.</p>
+      </div>
+
+      <!-- NPI (Accredo) — mirrors gpo-level-edit-row -->
+      <div class="cm-edit-row">
+        <div class="cm-edit-row__info">
+          <span class="cm-edit-row__label">NPI <span class="cm-edit-row__sub">(Accredo)</span></span>
+          <span class="cm-edit-row__count">{{ editForm.npisAccredo.length }} assigned</span>
+        </div>
+        <div class="cm-tag-input cm-tag-input--npi">
+          <span class="cm-tag cm-tag--npi" *ngFor="let npi of editForm.npisAccredo; let i = index">
+            {{ npi }}<button type="button" class="cm-tag__remove" (click)="removeNpi(i)">×</button>
+          </span>
+          <input class="cm-tag-input__field" [(ngModel)]="npiInput" name="npiInput"
+            placeholder="Type and press Enter to add…"
+            (keydown.enter)="addNpi(); $event.preventDefault()">
+          <button type="button" class="cm-tag-input__add" (click)="addNpi()" [disabled]="!npiInput.trim()">
+            <i class="bi bi-plus-lg"></i>
+          </button>
+        </div>
+        <p class="cm-tag-hint" *ngIf="!editForm.npisAccredo.length">No NPIs assigned yet.</p>
+      </div>
+
+    </div>
+
+    <div class="cm-modal-footer">
+      <button type="button" class="btn ib-btn-secondary" (click)="cancelEdit()">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="saveEdit()">Save Changes</button>
+    </div>
+
+  </div>
+</div>

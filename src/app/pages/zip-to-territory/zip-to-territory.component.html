@@ -1,0 +1,162 @@
+<div class="container-fluid">
+  <div class="ib-page-header">
+    <h2 class="ib-page-header__title">Zip to Territory</h2>
+  </div>
+
+  <!-- Filters -->
+  <div class="ib-filter-card ib-filter-card--compact mb-4">
+    <div class="row g-2 align-items-end">
+      <div class="col-lg-3">
+        <label class="form-label ib-compact-filter__label fw-bold small text-muted">Zip Code</label>
+        <input type="text" class="form-control form-control-sm bg-light ib-compact-filter__control"
+          [(ngModel)]="pendingZip" name="filterZip" placeholder="e.g. 75082 or Dallas" />
+      </div>
+      <div class="col-lg-3">
+        <label class="form-label ib-compact-filter__label fw-bold small text-muted">Territory</label>
+        <input type="text" class="form-control form-control-sm bg-light ib-compact-filter__control"
+          [(ngModel)]="pendingTerritory" name="filterTerritory" placeholder="e.g. NC1 or EAA" />
+      </div>
+      <div class="col-lg-2 d-flex align-items-end">
+        <button class="btn btn-primary btn-sm ib-compact-filter__button w-100" (click)="applyFilters()">
+          Apply
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Table -->
+  <div class="ib-section-card">
+    <div class="ib-section-card__header">
+      <h5 class="ib-section-card__title">Zip to Territory Mapping</h5>
+      <span class="ib-table-toolbar__meta">{{ filteredRows.length }} records</span>
+    </div>
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+          <thead class="ib-table-header">
+            <tr>
+              <th class="py-2 px-3" style="white-space:nowrap;">MDO ZIP</th>
+              <th class="py-2" style="white-space:nowrap;">Territory ID</th>
+              <th class="py-2" style="white-space:nowrap;">City</th>
+              <th class="py-2" style="white-space:nowrap;">State</th>
+              <th class="py-2" style="white-space:nowrap;">Curr Terr</th>
+              <th class="py-2" style="white-space:nowrap;">Lgcy Terr</th>
+              <th class="py-2" style="white-space:nowrap;">ABD</th>
+              <th class="py-2" style="white-space:nowrap;">TBM</th>
+              <th class="py-2" style="white-space:nowrap;">Effective</th>
+              <th class="py-2" style="white-space:nowrap;">Source</th>
+              <th class="py-2 text-center px-3">Actions</th>
+            </tr>
+          </thead>
+          <tbody>
+            <tr *ngFor="let row of filteredRows">
+              <td class="px-3 fw-bold text-primary" style="white-space:nowrap;">{{ row.mdoZip }}</td>
+              <td>{{ row.territoryId }}</td>
+              <td style="white-space:nowrap;">{{ row.city }}</td>
+              <td>{{ row.state }}</td>
+              <td><span class="ib-chip">{{ row.currTerr }}</span></td>
+              <td><span class="ib-chip ztt-chip--legacy">{{ row.lgcyTerr }}</span></td>
+              <td style="white-space:nowrap;">{{ row.abd }}</td>
+              <td style="white-space:nowrap;">{{ row.tbm }}</td>
+              <td style="white-space:nowrap;">{{ row.effective }}</td>
+              <td>
+                <span class="ib-status-badge"
+                  [class.ib-status-badge--info]="row.source === 'Veeva'"
+                  [class.ib-status-badge--warning]="row.source !== 'Veeva'">
+                  {{ row.source }}
+                </span>
+              </td>
+              <td class="text-center px-3">
+                <button class="ib-icon-btn" title="Edit row" (click)="openEdit(row)">
+                  <i class="bi bi-pencil"></i>
+                </button>
+              </td>
+            </tr>
+            <tr *ngIf="filteredRows.length === 0">
+              <td colspan="11" class="text-center text-muted py-4">No records match the current filters.</td>
+            </tr>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- Edit Modal -->
+<div *ngIf="editingRow" class="ib-modal-overlay" (click)="closeEdit()">
+  <div class="ib-modal-shell" style="max-width: 640px;" (click)="$event.stopPropagation()">
+
+    <div class="ib-modal-header">
+      <div class="d-flex flex-column gap-1">
+        <h5 class="ib-modal-title mb-0">Edit Mapping</h5>
+        <span class="text-muted small">ZIP {{ editingRow.mdoZip }} &mdash; {{ editingRow.city }}, {{ editingRow.state }}</span>
+      </div>
+      <button type="button" class="btn-close" (click)="closeEdit()"></button>
+    </div>
+
+    <div class="ib-modal-body">
+      <form #zttEditForm="ngForm">
+        <div class="row g-3">
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">MDO ZIP</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.mdoZip" name="mdoZip">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Territory ID</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.territoryId" name="territoryId">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">City</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.city" name="city">
+          </div>
+
+          <div class="col-md-2">
+            <label class="form-label fw-bold small text-muted">State</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.state" name="state">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label fw-bold small text-muted">Curr Terr</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.currTerr" name="currTerr">
+          </div>
+
+          <div class="col-md-3">
+            <label class="form-label fw-bold small text-muted">Lgcy Terr</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.lgcyTerr" name="lgcyTerr">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">ABD</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.abd" name="abd">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">TBM</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.tbm" name="tbm">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Effective</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.effective" name="effective">
+          </div>
+
+          <div class="col-md-4">
+            <label class="form-label fw-bold small text-muted">Source</label>
+            <input type="text" class="form-control bg-light" [(ngModel)]="editForm.source" name="source">
+          </div>
+
+        </div>
+      </form>
+    </div>
+
+    <div class="ztt-modal-footer">
+      <button type="button" class="btn ib-btn-secondary" (click)="closeEdit()">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="saveEdit()">Save Changes</button>
+    </div>
+
+  </div>
+</div>

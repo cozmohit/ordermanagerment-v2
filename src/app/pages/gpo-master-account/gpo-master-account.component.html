@@ -1,0 +1,305 @@
+<div class="container-fluid">
+  <div class="ib-page-header">
+    <h2 class="ib-page-header__title">GPO Hierarchy</h2>
+  </div>
+
+  <div class="ib-section-card">
+    <!-- <div class="ib-section-card__header">
+      <h5 class="ib-section-card__title">GPO Hierarchy</h5>
+      <span class="ib-table-toolbar__meta">{{ rows.length }} accounts</span>
+    </div> -->
+    <div class="card-body p-0">
+      <div class="table-responsive">
+        <table class="table table-hover table-sm align-middle mb-0 ib-data-table gpo-master-table">
+          <thead class="ib-table-header">
+            <tr>
+              <th class="py-2 px-3" style="white-space:nowrap;">BP Number</th>
+              <th class="py-2" style="white-space:nowrap;">Ship To Name</th>
+              <th class="py-2" style="white-space:nowrap;">Ship To Address 1</th>
+              <th class="py-2" style="white-space:nowrap;">Ship To City</th>
+              <th class="py-2" style="white-space:nowrap;">Ship To State</th>
+              <th class="py-2" style="white-space:nowrap;">Ship To Zip</th>
+              <th class="py-2">Channel</th>
+            </tr>
+          </thead>
+          <tbody>
+            <ng-container *ngFor="let row of rows">
+              <tr class="clickable-row" [class.row-expanded]="selectedRow === row" (click)="onRowClick(row)">
+                <td class="px-3 fw-bold text-primary" style="white-space:nowrap;">{{ row.bpNumber }}</td>
+                <td style="white-space:nowrap;">{{ row.shipToName }}</td>
+                <td style="white-space:nowrap;">{{ row.shipToAddress1 }}</td>
+                <td style="white-space:nowrap;">{{ row.shipToCity }}</td>
+                <td class="text-center">{{ row.shipToState }}</td>
+                <td style="white-space:nowrap;">{{ row.shipToZip }}</td>
+                <td><span class="ib-chip">{{ row.channel }}</span></td>
+              </tr>
+
+              <!-- Accordion expansion row -->
+              <tr *ngIf="selectedRow === row" class="accordion-row">
+                <td colspan="7" class="accordion-cell">
+                  <div class="accordion-content">
+
+                    <div class="accordion-heading-row">
+                      <span class="accordion-section-label">GPO Hierarchy</span>
+                      <button class="gpo-edit-toggle" (click)="openHierarchyEdit(row, $event)">
+                        <i class="bi bi-pencil"></i> Edit
+                      </button>
+                    </div>
+
+                    <div class="gpo-chain">
+
+                      <div class="gpo-col">
+                        <div class="gpo-col__label lvl1-label">
+                          <span class="gpo-col__badge">L1</span> GPO
+                        </div>
+                        <div class="gpo-node lvl1-node" [class.gpo-node--empty]="!row.gpoL1">
+                          <span class="gpo-node-text" [class.gpo-node-text--empty]="!row.gpoL1">{{ row.gpoL1 || '—'
+                            }}</span>
+                          <span class="gpo-status-badge"
+                            [class.gpo-status-badge--active]="getLevelStatus(row.gpoL1Start, row.gpoL1End) === 'active'">
+                            {{ getLevelStatus(row.gpoL1Start, row.gpoL1End) | titlecase }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="gpo-chain__connector"></div>
+
+                      <div class="gpo-col">
+                        <div class="gpo-col__label lvl2-label">
+                          <span class="gpo-col__badge">L2</span> Sub-GPO (Network)
+                        </div>
+                        <div class="gpo-node lvl2-node" [class.gpo-node--empty]="!row.subGpoL2">
+                          <span class="gpo-node-text" [class.gpo-node-text--empty]="!row.subGpoL2">{{ row.subGpoL2 ||
+                            '—' }}</span>
+                          <span class="gpo-status-badge"
+                            [class.gpo-status-badge--active]="getLevelStatus(row.subGpoL2Start, row.subGpoL2End) === 'active'">
+                            {{ getLevelStatus(row.subGpoL2Start, row.subGpoL2End) | titlecase }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="gpo-chain__connector"></div>
+
+                      <div class="gpo-col">
+                        <div class="gpo-col__label lvl3-label">
+                          <span class="gpo-col__badge">L3</span> Group
+                        </div>
+                        <div class="gpo-node lvl3-node" [class.gpo-node--empty]="!row.groupL3">
+                          <span class="gpo-node-text" [class.gpo-node-text--empty]="!row.groupL3">{{ row.groupL3 || '—'
+                            }}</span>
+                          <span class="gpo-status-badge"
+                            [class.gpo-status-badge--active]="getLevelStatus(row.groupL3Start, row.groupL3End) === 'active'">
+                            {{ getLevelStatus(row.groupL3Start, row.groupL3End) | titlecase }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="gpo-chain__connector"></div>
+
+                      <div class="gpo-col">
+                        <div class="gpo-col__label lvl4-label">
+                          <span class="gpo-col__badge">L4</span> Sub-Group
+                        </div>
+                        <div class="gpo-node lvl4-node" [class.gpo-node--empty]="!row.subGroupL4">
+                          <span class="gpo-node-text" [class.gpo-node-text--empty]="!row.subGroupL4">{{ row.subGroupL4
+                            || '—' }}</span>
+                          <span class="gpo-status-badge"
+                            [class.gpo-status-badge--active]="getLevelStatus(row.subGroupL4Start, row.subGroupL4End) === 'active'">
+                            {{ getLevelStatus(row.subGroupL4Start, row.subGroupL4End) | titlecase }}
+                          </span>
+                        </div>
+                      </div>
+
+                      <div class="gpo-chain__connector"></div>
+
+                      <div class="gpo-col">
+                        <div class="gpo-col__label lvl5-label">
+                          <span class="gpo-col__badge">L5</span> Practice
+                        </div>
+                        <div class="gpo-node lvl5-node" [class.gpo-node--empty]="!row.practiceL5">
+                          <span class="gpo-node-text" [class.gpo-node-text--empty]="!row.practiceL5">{{ row.practiceL5
+                            || '—' }}</span>
+                          <span class="gpo-status-badge"
+                            [class.gpo-status-badge--active]="getLevelStatus(row.practiceL5Start, row.practiceL5End) === 'active'">
+                            {{ getLevelStatus(row.practiceL5Start, row.practiceL5End) | titlecase }}
+                          </span>
+                        </div>
+                      </div>
+
+                    </div>
+                  </div>
+                </td>
+              </tr>
+            </ng-container>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+<!-- ── GPO Hierarchy Edit Modal ───────────────────────────── -->
+<div *ngIf="hierarchyEditRow" class="ib-modal-overlay" (click)="cancelHierarchyEdit()">
+  <div class="ib-modal-shell gpo-hierarchy-modal" (click)="$event.stopPropagation()">
+
+    <div class="ib-modal-header">
+      <h5 class="ib-modal-title mb-0">Edit GPO Hierarchy</h5>
+      <button type="button" class="btn-close" (click)="cancelHierarchyEdit()"></button>
+    </div>
+
+    <!-- Basic row info — editable -->
+    <div class="gpo-modal-basic-form">
+      <div class="row g-2">
+        <div class="col-md-3">
+          <label class="gpo-date-field__label">BP Number</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.bpNumber" name="bpNumber">
+        </div>
+        <div class="col-md-5">
+          <label class="gpo-date-field__label">Ship To Name</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.shipToName" name="shipToName">
+        </div>
+        <div class="col-md-4">
+          <label class="gpo-date-field__label">Channel</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.channel" name="channel">
+        </div>
+        <div class="col-md-5">
+          <label class="gpo-date-field__label">Ship To Address 1</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.shipToAddress1" name="shipToAddress1">
+        </div>
+        <div class="col-md-3">
+          <label class="gpo-date-field__label">Ship To City</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.shipToCity" name="shipToCity">
+        </div>
+        <div class="col-md-2">
+          <label class="gpo-date-field__label">Ship To State</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.shipToState" name="shipToState">
+        </div>
+        <div class="col-md-2">
+          <label class="gpo-date-field__label">Ship To Zip</label>
+          <input type="text" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.shipToZip" name="shipToZip">
+        </div>
+      </div>
+    </div>
+
+    <div class="ib-modal-body gpo-hierarchy-modal__body">
+
+      <!-- L1 -->
+      <div class="gpo-level-edit-row lvl1-edit">
+        <div class="gpo-level-edit-row__info">
+          <div class="gpo-col__label lvl1-label mb-0"><span class="gpo-col__badge">L1</span> GPO</div>
+          <span class="gpo-status-badge ms-auto" [class.gpo-status-badge--active]="getLevelStatus(hierarchyEditForm.gpoL1Start, hierarchyEditForm.gpoL1End) === 'active'">{{ getLevelStatus(hierarchyEditForm.gpoL1Start, hierarchyEditForm.gpoL1End) | titlecase }}</span>
+        </div>
+        <div class="gpo-level-edit-row__fields">
+          <div class="gpo-date-field gpo-date-field--value">
+            <label class="gpo-date-field__label">Value</label>
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.gpoL1" name="gpoL1" placeholder="—">
+          </div>
+          <div class="gpo-date-field">
+            <label class="gpo-date-field__label">Start Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.gpoL1Start" name="gpoL1Start">
+          </div>
+          <div class="gpo-date-field">
+            <label class="gpo-date-field__label">End Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.gpoL1End" name="gpoL1End">
+          </div>
+        </div>
+      </div>
+
+      <!-- L2 -->
+      <div class="gpo-level-edit-row lvl2-edit">
+        <div class="gpo-level-edit-row__info">
+          <div class="gpo-col__label lvl2-label mb-0"><span class="gpo-col__badge">L2</span> Sub-GPO (Network)</div>
+          <span class="gpo-status-badge ms-auto" [class.gpo-status-badge--active]="getLevelStatus(hierarchyEditForm.subGpoL2Start, hierarchyEditForm.subGpoL2End) === 'active'">{{ getLevelStatus(hierarchyEditForm.subGpoL2Start, hierarchyEditForm.subGpoL2End) | titlecase }}</span>
+        </div>
+        <div class="gpo-level-edit-row__fields">
+          <div class="gpo-date-field gpo-date-field--value">
+            <label class="gpo-date-field__label">Value</label>
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.subGpoL2" name="subGpoL2" placeholder="—">
+          </div>
+          <div class="gpo-date-field">
+            <label class="gpo-date-field__label">Start Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.subGpoL2Start" name="subGpoL2Start">
+          </div>
+          <div class="gpo-date-field">
+            <label class="gpo-date-field__label">End Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.subGpoL2End" name="subGpoL2End">
+          </div>
+        </div>
+      </div>
+
+      <!-- L3 -->
+      <div class="gpo-level-edit-row lvl3-edit">
+        <div class="gpo-level-edit-row__info">
+          <div class="gpo-col__label lvl3-label mb-0"><span class="gpo-col__badge">L3</span> Group</div>
+          <span class="gpo-status-badge ms-auto" [class.gpo-status-badge--active]="getLevelStatus(hierarchyEditForm.groupL3Start, hierarchyEditForm.groupL3End) === 'active'">{{ getLevelStatus(hierarchyEditForm.groupL3Start, hierarchyEditForm.groupL3End) | titlecase }}</span>
+        </div>
+        <div class="gpo-level-edit-row__fields">
+          <div class="gpo-date-field gpo-date-field--value">
+            <label class="gpo-date-field__label">Value</label>
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.groupL3" name="groupL3" placeholder="—">
+          </div>
+          <div class="gpo-date-field">
+            <label class="gpo-date-field__label">Start Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.groupL3Start" name="groupL3Start">
+          </div>
+          <div class="gpo-date-field">
+            <label class="gpo-date-field__label">End Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.groupL3End" name="groupL3End">
+          </div>
+        </div>
+      </div>
+
+      <!-- L4 -->
+      <div class="gpo-level-edit-row lvl4-edit">
+        <div class="gpo-level-edit-row__info">
+          <div class="gpo-col__label lvl4-label mb-0"><span class="gpo-col__badge">L4</span> Sub-Group</div>
+          <span class="gpo-status-badge ms-auto" [class.gpo-status-badge--active]="getLevelStatus(hierarchyEditForm.subGroupL4Start, hierarchyEditForm.subGroupL4End) === 'active'">{{ getLevelStatus(hierarchyEditForm.subGroupL4Start, hierarchyEditForm.subGroupL4End) | titlecase }}</span>
+        </div>
+        <div class="gpo-level-edit-row__fields">
+          <div class="gpo-date-field gpo-date-field--value">
+            <label class="gpo-date-field__label">Value</label>
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.subGroupL4" name="subGroupL4" placeholder="—">
+          </div>
+          <div class="gpo-date-field">
+            <label class="gpo-date-field__label">Start Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.subGroupL4Start" name="subGroupL4Start">
+          </div>
+          <div class="gpo-date-field">
+            <label class="gpo-date-field__label">End Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.subGroupL4End" name="subGroupL4End">
+          </div>
+        </div>
+      </div>
+
+      <!-- L5 -->
+      <div class="gpo-level-edit-row lvl5-edit">
+        <div class="gpo-level-edit-row__info">
+          <div class="gpo-col__label lvl5-label mb-0"><span class="gpo-col__badge">L5</span> Practice</div>
+          <span class="gpo-status-badge ms-auto" [class.gpo-status-badge--active]="getLevelStatus(hierarchyEditForm.practiceL5Start, hierarchyEditForm.practiceL5End) === 'active'">{{ getLevelStatus(hierarchyEditForm.practiceL5Start, hierarchyEditForm.practiceL5End) | titlecase }}</span>
+        </div>
+        <div class="gpo-level-edit-row__fields">
+          <div class="gpo-date-field gpo-date-field--value">
+            <label class="gpo-date-field__label">Value</label>
+            <input type="text" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.practiceL5" name="practiceL5" placeholder="—">
+          </div>
+          <div class="gpo-date-field">
+            <label class="gpo-date-field__label">Start Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.practiceL5Start" name="practiceL5Start">
+          </div>
+          <div class="gpo-date-field">
+            <label class="gpo-date-field__label">End Date</label>
+            <input type="date" class="form-control form-control-sm" [(ngModel)]="hierarchyEditForm.practiceL5End" name="practiceL5End">
+          </div>
+        </div>
+      </div>
+
+    </div>
+
+    <div class="gpo-master-modal-footer">
+      <button type="button" class="btn ib-btn-secondary" (click)="cancelHierarchyEdit()">Cancel</button>
+      <button type="button" class="btn btn-primary" (click)="saveHierarchyEdit()">Save Changes</button>
+    </div>
+
+  </div>
+</div>

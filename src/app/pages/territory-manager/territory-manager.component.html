@@ -1,0 +1,366 @@
+<div class="container-fluid position-relative">
+  <div class="ib-page-header">
+    <div>
+      <p class="ib-page-header__eyebrow">Field Operations</p>
+      <h2 class="ib-page-header__title">Territory Management</h2>
+      <!-- <p class="ib-page-header__subtitle">Master territory registry, one-rep-per-territory assignment control, and read-only performance intelligence.</p> -->
+    </div>
+    <div class="ib-page-header__actions">
+      <button class="btn ib-btn-secondary" *ngIf="activeTab === 'territories'" (click)="exportTerritories()">
+        <i class="bi bi-download"></i> Export
+      </button>
+      <button class="btn btn-primary" (click)="showForm = true" *ngIf="activeTab === 'territories'">
+        <i class="bi bi-plus-lg"></i> Add Territory
+      </button>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'territories'">
+    <div class="territory-kpi-grid mb-4">
+      <div class="card border-0 shadow-sm territory-kpi-card territory-kpi-card--accent"><div class="card-body"><p class="territory-kpi-card__label">Total Territories</p><h4 class="territory-kpi-card__value">{{ territoryKpis.totalTerritories }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Active</p><h4 class="territory-kpi-card__value">{{ territoryKpis.activeTerritories }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Inactive</p><h4 class="territory-kpi-card__value">{{ territoryKpis.inactiveTerritories }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Unassigned</p><h4 class="territory-kpi-card__value">{{ territoryKpis.unassignedTerritories }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Covered Patients</p><h4 class="territory-kpi-card__value">{{ territoryKpis.coveredPatients }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Covered Physicians</p><h4 class="territory-kpi-card__value">{{ territoryKpis.coveredPhysicians }}</h4></div></div>
+    </div>
+
+    <div class="ib-filter-card mb-4">
+      <div class="row g-3 align-items-end">
+        <div class="col-lg-4">
+          <label class="form-label fw-bold small text-muted">Search</label>
+          <input class="form-control bg-light" [(ngModel)]="territoryFilters.search" name="territorySearch" placeholder="Territory id, name, director..." />
+        </div>
+        <div class="col-lg-3">
+          <label class="form-label fw-bold small text-muted">Director</label>
+          <select class="form-select bg-light" [(ngModel)]="territoryFilters.director" name="territoryDirector">
+            <option *ngFor="let option of directorOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-lg-3">
+          <label class="form-label fw-bold small text-muted">Product</label>
+          <select class="form-select bg-light" [(ngModel)]="territoryFilters.product" name="territoryProduct">
+            <option *ngFor="let option of productOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-lg-2">
+          <label class="form-label fw-bold small text-muted">Status</label>
+          <select class="form-select bg-light" [(ngModel)]="territoryFilters.status" name="territoryStatus">
+            <option value="All">All</option>
+            <option value="Active">Active</option>
+            <option value="Inactive">Inactive</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Territory Registry</h5>
+          <!-- <p class="ib-section-card__meta">Single source of truth for territory ownership, assignment visibility, and operational coverage.</p> -->
+        </div>
+        <span class="ib-table-toolbar__meta">{{ filteredTerritories.length }} matching territories</span>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+            <thead class="ib-table-header">
+              <tr>
+                <th scope="col" class="py-2 px-3">Territory ID</th>
+                <th scope="col" class="py-2">Territory Name</th>
+                <th scope="col" class="py-2">Director / Region</th>
+                <th scope="col" class="py-2">Assigned Rep</th>
+                <th scope="col" class="py-2">Product</th>
+                <th scope="col" class="py-2">Coverage</th>
+                <th scope="col" class="py-2">Status</th>
+                <th scope="col" class="py-2 text-end">Target Revenue</th>
+                <th scope="col" class="py-2 px-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let territory of filteredTerritories">
+                <td class="px-3 "><span class="ib-chip">{{ territory.id }}</span></td>
+                <td >{{ territory.name }}</td>
+                <td>
+                  <div class="d-flex flex-column">
+                    <span>{{ territory.director }}</span>
+                    <small class="text-muted">{{ territory.name }} Region</small>
+                  </div>
+                </td>
+                <td>
+                  <span class="ib-status-badge" [ngClass]="getAssignedRep(territory) ? 'ib-status-badge--success' : 'ib-status-badge--warning'">
+                    {{ getAssignedRep(territory)?.name || 'Unassigned' }}
+                  </span>
+                </td>
+                <td><span class="ib-chip">{{ territory.product }}</span></td>
+                <td class="small text-muted">{{ territoryKpis.coveredPatients }} patients / {{ territoryKpis.coveredPhysicians }} physicians</td>
+                <td>
+                  <span class="ib-status-badge" [ngClass]="(territory.status ?? 'Active') === 'Active' ? 'ib-status-badge--success' : 'ib-status-badge--danger'">
+                    {{ territory.status ?? 'Active' }}
+                  </span>
+                </td>
+                <td class="text-success text-end">{{ territory.revenue | currency:'USD':'symbol':'1.0-0' }}</td>
+                <td class="px-3 text-end">
+                  <div class="ib-action-group">
+                    <button class="ib-icon-btn" (click)="openAssignmentModal({ territoryId: territory.id, territoryName: territory.name, repName: getAssignedRep(territory)?.name || 'Unassigned' })"><i class="bi bi-person-check"></i></button>
+                    <button class="ib-icon-btn" (click)="editTerritory(territory)"><i class="bi bi-pencil"></i></button>
+                    <button class="ib-icon-btn ib-icon-btn--danger" (click)="deleteTerritory(territory.id)"><i class="bi bi-trash"></i></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'assignment'">
+    <div class="territory-kpi-grid mb-4">
+      <div class="card border-0 shadow-sm territory-kpi-card territory-kpi-card--accent"><div class="card-body"><p class="territory-kpi-card__label">Total Reps</p><h4 class="territory-kpi-card__value">{{ assignmentSummary.totalReps }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Assigned Reps</p><h4 class="territory-kpi-card__value">{{ assignmentSummary.assignedReps }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Unassigned Reps</p><h4 class="territory-kpi-card__value">{{ assignmentSummary.unassignedReps }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Territories Without Rep</p><h4 class="territory-kpi-card__value">{{ assignmentSummary.territoriesWithoutRep }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Rep Load</p><h4 class="territory-kpi-card__value territory-kpi-card__value--small">{{ assignmentSummary.repLoadDistribution }}</h4></div></div>
+    </div>
+
+    <div class="ib-filter-card mb-4" *ngIf="assignmentAlerts.length > 0">
+      <h5 class="ib-section-card__title mb-2">Assignment Validation</h5>
+      <div class="territory-alert-list">
+        <div *ngFor="let alert of assignmentAlerts" class="territory-alert-item">{{ alert }}</div>
+      </div>
+    </div>
+
+    <div class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Sales Rep Assignment</h5>
+          <!-- <p class="ib-section-card__meta">Operational one-active-rep-per-territory mapping with reassignment and conflict visibility.</p> -->
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0 ib-data-table">
+            <thead class="ib-table-header">
+              <tr>
+                <th class="py-2 px-3">Rep Name</th>
+                <th class="py-2">Territory</th>
+                <th class="py-2">Region</th>
+                <th class="py-2">Assigned Date</th>
+                <th class="py-2">Manager</th>
+                <th class="py-2">Status</th>
+                <th class="py-2 px-3 text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of assignmentRows">
+                <td class="px-3 ">{{ row.repName }}</td>
+                <td>{{ row.territoryName }}</td>
+                <td>{{ row.region }}</td>
+                <td class="text-muted">{{ row.assignedDate }}</td>
+                <td>{{ row.director }}</td>
+                <td>
+                  <span class="ib-status-badge" [ngClass]="row.hasConflict ? 'ib-status-badge--warning' : 'ib-status-badge--success'">
+                    {{ row.hasConflict ? 'Needs Attention' : 'Assigned' }}
+                  </span>
+                </td>
+                <td class="px-3 text-end">
+                  <div class="ib-action-group">
+                    <button class="ib-icon-btn" (click)="openAssignmentModal({ territoryId: row.territoryId, territoryName: row.territoryName, repName: row.repName })"><i class="bi bi-arrow-repeat"></i></button>
+                    <button class="ib-icon-btn" (click)="openHistoryModal(row.territoryName)"><i class="bi bi-clock-history"></i></button>
+                    <button class="ib-icon-btn ib-icon-btn--danger" (click)="removeAssignment(row.territoryId)"><i class="bi bi-person-x"></i></button>
+                  </div>
+                </td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="activeTab === 'performance'">
+    <div class="territory-kpi-grid mb-4">
+      <div class="card border-0 shadow-sm territory-kpi-card territory-kpi-card--accent"><div class="card-body"><p class="territory-kpi-card__label">Revenue</p><h4 class="territory-kpi-card__value">{{ performanceKpis.revenue | currency:'USD':'symbol':'1.0-0' }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Units Sold</p><h4 class="territory-kpi-card__value">{{ performanceKpis.units }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Orders Count</p><h4 class="territory-kpi-card__value">{{ performanceKpis.orders }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Enrollments</p><h4 class="territory-kpi-card__value">{{ performanceKpis.enrollments }}</h4></div></div>
+      <div class="card border-0 shadow-sm territory-kpi-card"><div class="card-body"><p class="territory-kpi-card__label">Goal %</p><h4 class="territory-kpi-card__value">{{ performanceKpis.goalPercent }}%</h4></div></div>
+    </div>
+
+    <div class="ib-filter-card mb-4">
+      <div class="row g-3 align-items-end">
+        <div class="col-md-4">
+          <label class="form-label fw-bold small text-muted">Director</label>
+          <select class="form-select bg-light" [(ngModel)]="performanceFilters.director" name="performanceDirector" (ngModelChange)="refreshPerformanceChart()">
+            <option *ngFor="let option of directorOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small text-muted">Product</label>
+          <select class="form-select bg-light" [(ngModel)]="performanceFilters.product" name="performanceProduct" (ngModelChange)="refreshPerformanceChart()">
+            <option *ngFor="let option of productOptions" [ngValue]="option">{{ option }}</option>
+          </select>
+        </div>
+        <div class="col-md-4">
+          <label class="form-label fw-bold small text-muted">Period</label>
+          <select class="form-select bg-light" [(ngModel)]="performanceFilters.period" name="performancePeriod" (ngModelChange)="refreshPerformanceChart()">
+            <option value="q2">Q2 2026</option>
+            <option value="ytd">YTD</option>
+          </select>
+        </div>
+      </div>
+    </div>
+
+    <div class="ib-section-card mb-4">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Revenue by Territory</h5>
+          <!-- <p class="ib-section-card__meta">Read-only performance analytics by territory.</p> -->
+        </div>
+      </div>
+      <div class="card-body">
+        <div class="territory-performance-chart" #territoryPerformanceChart></div>
+      </div>
+    </div>
+
+    <div class="ib-section-card">
+      <div class="ib-section-card__header">
+        <div>
+          <h5 class="ib-section-card__title">Territory Leaderboard</h5>
+          <!-- <p class="ib-section-card__meta">Revenue, units, orders, enrollments, and goal progress by territory.</p> -->
+        </div>
+      </div>
+      <div class="card-body p-0">
+        <div class="table-responsive">
+          <table class="table table-hover table-sm align-middle mb-0 ib-data-table">
+            <thead class="ib-table-header">
+              <tr>
+                <th class="py-2 px-3">Rank</th>
+                <th class="py-2 px-3">Territory</th>
+                <th class="py-2">Area Business Director</th>
+                <th class="py-2 text-end">Units</th>
+                <th class="py-2 text-end">Orders</th>
+                <th class="py-2 text-end">Enrollments</th>
+                <th class="py-2 text-end">YTD Revenue</th>
+                <th class="py-2 text-end">Progress to Target</th>
+                <th class="py-2">Progress</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr *ngFor="let row of performanceRows; let i = index">
+                <td class="px-3  text-muted">{{ i + 1 }}</td>
+                <td class="px-3 ">{{ row.territory.name }}</td>
+                <td class="text-muted">{{ row.territory.director }}</td>
+                <td class="text-end">{{ row.units }}</td>
+                <td class="text-end">{{ row.orders }}</td>
+                <td class="text-end">{{ row.enrollments }}</td>
+                <td class="text-end text-success">{{ row.revenue | currency:'USD':'symbol':'1.0-0' }}</td>
+                <td class="text-end ">{{ row.goalPercent }}%</td>
+                <td class="text-end ">{{ row.goalPercent }}%</td>
+              </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showAssignmentModal && selectedAssignment" class="ib-modal-overlay">
+    <div class="ib-modal-shell" style="max-width: 520px;">
+      <div class="ib-modal-header">
+        <h5 class="ib-modal-title">Assign Sales Rep</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeAssignmentModal()"></button>
+      </div>
+      <div class="ib-modal-body">
+        <div class="ib-form-section mb-4">
+          <p class="ib-form-section__title">Assignment Details</p>
+          <p class="mb-2"><strong>Territory:</strong> {{ selectedAssignment.territoryName }}</p>
+          <p class="mb-0"><strong>Current Rep:</strong> {{ selectedAssignment.currentRep }}</p>
+        </div>
+
+        <div class="ib-form-section mb-4">
+          <label class="form-label fw-bold small text-muted">Assign Rep</label>
+          <select class="form-select bg-light" [(ngModel)]="assignmentForm.repName" name="assignmentRepName">
+            <option value="">Select rep</option>
+            <option *ngFor="let rep of salesTeam" [ngValue]="rep.name" [disabled]="rep.position === 'Area Business Director'">{{ rep.name }} - {{ rep.position }}</option>
+          </select>
+        </div>
+
+        <div class="d-flex justify-content-end gap-2 border-top pt-3">
+          <button type="button" class="btn ib-btn-secondary" (click)="closeAssignmentModal()">Cancel</button>
+          <button type="button" class="btn btn-primary" [disabled]="!assignmentForm.repName" (click)="saveAssignment()">Save Assignment</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showHistoryModal && assignmentHistoryTerritory" class="ib-modal-overlay">
+    <div class="ib-modal-shell" style="max-width: 560px;">
+      <div class="ib-modal-header">
+        <h5 class="ib-modal-title">Assignment History</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeHistoryModal()"></button>
+      </div>
+      <div class="ib-modal-body">
+        <div class="ib-form-section">
+          <p class="ib-form-section__title">{{ assignmentHistoryTerritory }}</p>
+          <p class="mb-2">Jan-Mar: Rep X</p>
+          <p class="mb-0">Apr-Present: {{ getCurrentAssignmentHistoryRep() }}</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div *ngIf="showForm" class="ib-modal-overlay">
+    <div class="ib-modal-shell" style="max-width: 520px;">
+      <div class="ib-modal-header">
+        <h5 class="ib-modal-title">{{ editingTerritoryId ? 'Edit Territory' : 'Add New Territory' }}</h5>
+        <button type="button" class="btn-close" aria-label="Close" (click)="closeForm()"></button>
+      </div>
+      <div class="ib-modal-body">
+        <form (ngSubmit)="addTerritory()" #terrForm="ngForm">
+          <div class="ib-form-section mb-4">
+            <p class="ib-form-section__title">Territory Details</p>
+            <div class="row g-3">
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">Territory ID</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="newTerritory.id" name="id" required [disabled]="!!editingTerritoryId" placeholder="e.g. EA1">
+              </div>
+              <div class="col-md-6">
+                <label class="form-label fw-bold small text-muted">Territory Name</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="newTerritory.name" name="name" required placeholder="e.g. East">
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold small text-muted">Area Business Director</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="newTerritory.director" name="director" required placeholder="e.g. Keith DeRuiter">
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold small text-muted">Prescribed Product</label>
+                <input type="text" class="form-control bg-light" [(ngModel)]="newTerritory.product" name="product" required>
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold small text-muted">Target Revenue ($)</label>
+                <input type="number" class="form-control bg-light" [(ngModel)]="newTerritory.revenue" name="revenue" required min="0">
+              </div>
+              <div class="col-md-12">
+                <label class="form-label fw-bold small text-muted">Status</label>
+                <select class="form-select bg-light" [(ngModel)]="newTerritory.status" name="status" required>
+                  <option value="Active">Active</option>
+                  <option value="Inactive">Inactive</option>
+                </select>
+              </div>
+            </div>
+          </div>
+
+          <div class="d-flex justify-content-end gap-2 border-top pt-3">
+            <button type="button" class="btn ib-btn-secondary" (click)="closeForm()">Cancel</button>
+            <button type="submit" class="btn btn-primary" [disabled]="!terrForm.valid">
+              {{ editingTerritoryId ? 'Update Territory' : 'Save Territory' }}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>

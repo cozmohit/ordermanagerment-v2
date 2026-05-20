@@ -1,0 +1,61 @@
+.territory-kpi-grid {
+  display: grid;
+  gap: 1rem;
+  grid-template-columns: repeat(auto-fit, minmax(170px, 1fr));
+}
+
+.territory-kpi-card {
+  border: 1px solid var(--ib-border);
+  border-radius: var(--ib-radius-lg);
+
+  .card-body {
+    padding: 1rem 1.1rem;
+  }
+}
+
+.territory-kpi-card--accent {
+  border-left: 4px solid var(--ib-navy);
+}
+
+.territory-kpi-card__label {
+  color: var(--ib-muted);
+  font-size: 0.76rem;
+  font-weight: 700;
+  letter-spacing: 0.2px;
+  margin-bottom: 0.35rem;
+  text-transform: uppercase;
+}
+
+.territory-kpi-card__value {
+  color: var(--ib-navy);
+  margin: 0;
+}
+
+.territory-kpi-card__value--small {
+  font-size: 1rem;
+}
+
+.territory-alert-list {
+  display: grid;
+  gap: 0.75rem;
+}
+
+.territory-alert-item {
+  background: #fff7e8;
+  border: 1px solid #f7ddb2;
+  border-radius: 12px;
+  color: #9a5b06;
+  font-size: 0.83rem;
+  padding: 0.85rem 1rem;
+}
+
+.territory-performance-chart {
+  height: 340px;
+  width: 100%;
+}
+
+@media (max-width: 991.98px) {
+  .territory-performance-chart {
+    height: 280px;
+  }
+}

@@ -1,0 +1,58 @@
+<nav class="navbar navbar-expand-lg top-nav-shell p-2">
+  <div class="container-fluid">
+    <div class="d-flex align-items-center gap-3 top-nav-brand-wrap">
+      <button
+        type="button"
+        class="top-nav-sidebar-btn"
+        (click)="toggleSidebar.emit()"
+        [attr.aria-label]="sidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'">
+        <i [class]="sidebarCollapsed ? 'bi bi-layout-sidebar-inset' : 'bi bi-layout-sidebar'"></i>
+      </button>
+
+      <a routerLink="/" class="top-nav-brand-link d-flex align-items-center text-decoration-none h2" aria-label="Slipstream Home">
+        <img
+          src="/ssitlogo.png"
+          alt="Slipstream"
+          class="top-nav-logo"
+          width="40"
+          height="50"
+        />
+      </a>
+    </div>
+
+    <div class="d-flex align-items-center ms-auto gap-3">
+      <!-- <div class="input-group top-nav-search">
+        <span class="input-group-text border-end-0">
+          <i class="bi bi-search"></i>
+        </span>
+        <input type="text" class="form-control border-start-0" placeholder="Search orders, patients..." />
+      </div> -->
+
+      <div class="dropdown">
+        <a
+          href="#"
+          class="d-flex align-items-center text-dark text-decoration-none dropdown-toggle top-nav-user"
+          id="dropdownUser"
+          data-bs-toggle="dropdown"
+          aria-expanded="false">
+          <img
+            src="https://ui-avatars.com/api/?name=Admin+User&background=0A2463&color=fff&font-size=0.4"
+            alt="User"
+            width="36"
+            height="36"
+            class="rounded-circle me-2 top-nav-avatar" />
+          <div class="d-flex flex-column lh-1">
+            <strong class="top-nav-user-name">Admin</strong>
+            <small class="top-nav-user-org">ImmunityBio</small>
+          </div>
+        </a>
+        <ul class="dropdown-menu dropdown-menu-end text-small shadow top-nav-menu" aria-labelledby="dropdownUser">
+          <li><a class="dropdown-item" href="#">Settings</a></li>
+          <li><a class="dropdown-item" href="#">Profile</a></li>
+          <li><hr class="dropdown-divider" /></li>
+          <li><a class="dropdown-item text-danger" href="#">Sign out</a></li>
+        </ul>
+      </div>
+    </div>
+  </div>
+</nav>

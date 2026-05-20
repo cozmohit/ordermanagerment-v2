@@ -1,0 +1,71 @@
+.gpo-table {
+  font-size: 0.8rem;
+
+  td, th {
+    vertical-align: middle;
+  }
+}
+
+.gpo-text-sm {
+  color: var(--ib-navy);
+  font-size: 0.78rem;
+}
+
+.gpo-edit-modal {
+  display: flex;
+  flex-direction: column;
+  max-height: 90vh;
+  max-width: 860px;
+  width: 100%;
+
+  .ib-modal-body {
+    overflow-y: auto;
+  }
+}
+
+.gpo-details-grid {
+  border: 1px solid var(--ib-border);
+  border-radius: 10px;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.gpo-details-row {
+  align-items: baseline;
+  border-bottom: 1px solid var(--ib-border);
+  display: flex;
+  gap: 1rem;
+  padding: 0.65rem 1rem;
+
+  &:last-child { border-bottom: none; }
+  &:nth-child(odd) { background: #f8fafc; }
+}
+
+.gpo-details-label {
+  color: var(--ib-muted);
+  flex-shrink: 0;
+  font-size: 0.75rem;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  min-width: 100px;
+  text-transform: uppercase;
+}
+
+.gpo-details-value {
+  font-size: 0.85rem;
+}
+
+.gpo-l-label {
+  flex-shrink: 0;
+  min-width: 24px;
+  text-align: right;
+}
+
+.gpo-modal-footer {
+  border-top: 1px solid var(--ib-border);
+  display: flex;
+  gap: 0.5rem;
+  justify-content: flex-end;
+  padding: 1rem 1.5rem;
+}
